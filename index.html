@@ -50,7 +50,7 @@
 
     function create ()
     {
-       // drawMode=2;
+       
         cursors = this.input.keyboard.createCursorKeys();
         spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
         keys = this.input.keyboard
@@ -173,8 +173,7 @@ function handleMove()
         if(drawMode==0)//;free move mode
         {
             if(onBorder(newRow,newCol))
-            {
-                borderBackup=border.slice(0);//Backup the current borders in case the player dies and this line will be removed
+            {               
                 player.x=newCol;
                 player.y=newRow;
                 reachedMinPosition=true;
@@ -186,9 +185,13 @@ function handleMove()
             {
                 if(withinScreen(newRow,newCol) && !isCaptured(newRow, newCol))//Player is leaving a border
                 {
+                    console.log("Starting Drawing");
+                    borderBackup=border.slice(0);//Backup the current borders in case the player dies and this line will be removed
+
                     player.x=newCol;
                     player.y=newRow;
                     isDrawing=true;
+                    addPlayerPositionToBorder();
                 }
                 else//stay still this would be an invalid position
                 {
@@ -206,8 +209,9 @@ function handleMove()
                     drawMode=0;
                     isDrawing=false;
                     processCapture();
-                }else if(!isTemporary(newRow,newCol))//player is still drawing move them along as long as they don't cross their own path
+                }else if(true/*!isTemporary(newRow,newCol)*/)//player is still drawing move them along as long as they don't cross their own path
                 {
+                    //THIS IS TEMPORARY LINE BREAKS THINGS
                     player.x=newCol;
                     player.y=newRow;
                     addPlayerPositionToBorder();
@@ -248,6 +252,7 @@ function addAllTemporaryBorders()
 }
 function processCapture()//player has completed a square, process it
 {
+    console.log("Done Drawing!");
     addAllTemporaryBorders();
 }
 
