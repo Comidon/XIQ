@@ -35,6 +35,7 @@
     var fastSpeed=2*slowSpeed;    
     var board=[];
     var border=[];
+    var borderBackup=[];
     var drawMode=0; //0: none 1:slow 2: fast
     var isDrawing=false;
 
@@ -173,6 +174,7 @@ function handleMove()
         {
             if(onBorder(newRow,newCol))
             {
+                borderBackup=border.slice(0);//Backup the current borders in case the player dies and this line will be removed
                 player.x=newCol;
                 player.y=newRow;
                 reachedMinPosition=true;
@@ -204,10 +206,11 @@ function handleMove()
                     drawMode=0;
                     isDrawing=false;
                     processCapture();
-                }else//player is still drawing
+                }else if(!isTemporary(newRow,newCol))//player is still drawing move them along as long as they don't cross their own path
                 {
                     player.x=newCol;
                     player.y=newRow;
+                    addPlayerPositionToBorder();
                 }
             }
             
@@ -218,10 +221,34 @@ function handleMove()
     }
 
 }
+function isTemporary(row, col)
+{
+    return border[get1DIndex(player.y,player.x)]==2;
+}
 
+function addPlayerPositionToBorder()//Adds the current player position onto the border as a temporary point
+{
+    border[get1DIndex(player.y,player.x)]=2;
+}
+
+function addAllTemporaryBorders()
+{
+    for(col=0;col<config.width;col++)
+    {
+        for(row=0;row<config.height;row++)
+        {
+            //console.log(get1DIndex(row,col));
+            if(border[get1DIndex(row,col)]==2)
+            {
+                border[get1DIndex(row,col)]=1;
+            }
+
+        }    
+    }    
+}
 function processCapture()//player has completed a square, process it
 {
-
+    addAllTemporaryBorders();
 }
 
 function isCaptured(row, col)//Will eventually tell whether this point has been captured
@@ -250,6 +277,7 @@ function onBorder(row, col)
     return false;
 
 }
+
 
     </script>
 
