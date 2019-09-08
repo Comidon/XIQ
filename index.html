@@ -43,7 +43,7 @@
     var whiteColor;
     var _this;
     var graphics;
-
+    var drawColor =0xFFFFFF;
 
     function preload ()
     {
@@ -72,6 +72,8 @@
         });
 
         emitter.startFollow(player);
+
+        drawBorders();
     }
 
 function get1DIndex(row, col)
@@ -152,10 +154,28 @@ function update ()
 
     handleMove();
 
+
+}
+
+function drawBorders()
+{
+    for(col = 0; col < config.width; col++)
+    {
+        for(row = 0;row < config.height; row++)
+        {
+            var point = border[get1DIndex(row, col)];
+            if(point == 1  || point == 2 )
+            {
+                fillPixel(0xFFFFFF, col, row);
+            }
+
+        }
+    }
 }
 
 function handleMove()
 {
+
     let speed = 0;
     if(drawMode == 0)
     {
@@ -164,10 +184,12 @@ function handleMove()
     else if(drawMode == 1)
     {
         speed = slowSpeed;
+        drawColor = 0x0000FF;
     }
     else if(drawMode == 2)
     {
         speed = fastSpeed;
+        drawColor = 0xFF0000;
     }
 
     for(i = 0; i < speed; i++)
@@ -238,17 +260,16 @@ function handleMove()
                     isDrawing = false;
                     processCapture();
                 }
-                else if(true/*!isTemporary(newRow,newCol)*/)//player is still drawing move them along as long as they don't cross their own path
+                else if(isTemporary(newRow,newCol))//player is still drawing move them along as long as they don't cross their own path
                 {
                     //THIS IS TEMPORARY LINE BREAKS THINGS
                     player.x = newCol;
                     player.y = newRow;
                     addPlayerPositionToBorder();
-                    fillPixel(player.x, player.y);
                 }
             }
 
-            reachedMinPosition=true;
+            reachedMinPosition = true;
         }
     }
 }
@@ -261,6 +282,7 @@ function isTemporary(row, col)
 function addPlayerPositionToBorder() //Adds the current player position onto the border as a temporary point
 {
     border[get1DIndex(player.y,player.x)] = 2;
+    fillPixel(player.x, player.y, drawColor);
 }
 
 function addAllTemporaryBorders()
@@ -314,9 +336,10 @@ function onBorder(row, col)
     return false;
 }
 
-function fillPixel(x, y)
+function fillPixel(x, y, color)
 {
   var rect = new Phaser.Geom.Rectangle(x, y, 1, 1);
+  graphics.fillStyle(color, 1.0);
   graphics.fillRectShape(rect);
 }
 
