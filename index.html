@@ -6,11 +6,11 @@
 </head>
 <body>
         <script type="text/javascript">
-    
+
     var config = {
         type: Phaser.AUTO,
-        width: 800,
-        height: 600,
+        width: 500,
+        height: 500,
         physics: {
             default: 'arcade',
             arcade: {
@@ -18,87 +18,265 @@
             debug: false
         }
         },
+
         scene: {
             preload: preload,
             create: create,
-           update: update
+            update: update
         }
     };
 
     var game = new Phaser.Game(config);
     var player;
     var cursors;
-    var gameOver =false;
+    var spacebar;
+    var gameOver = false;
     var input;
-    
+    var slowSpeed = 5;
+    var fastSpeed = 2 * slowSpeed;
+    var board = [];
+    var border = [];
+    var borderBackup = [];
+    var drawMode = 0; //0: none 1:slow 2: fast
+    var isDrawing = false;
+
     function preload ()
     {
-        this.load.image('player', 'assets/player.png');      
+        this.load.image('player', 'assets/player.png');
         this.load.image('red', 'assets/red.png');
     }
 
     function create ()
-    {          
-      cursors = this.input.keyboard.createCursorKeys();
-        player = this.physics.add.sprite(100, 450, 'player');
-        player.setCollideWorldBounds(true);
+    {
+        cursors = this.input.keyboard.createCursorKeys();
+        spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        keys = this.input.keyboard
+        player = this.add.sprite(0, 0, 'player');
+
+        initBoard();
 
         var particles = this.add.particles('red');
-
         var emitter = particles.createEmitter({
             speed: 50,
             scale: { start: .2, end: .01 },
             blendMode: 'ADD'
         });
 
-      
         emitter.startFollow(player);
-        player.setVelocityX(160);
     }
 
-    function update ()
+function get1DIndex(row, col)
 {
-    
+    if(row < 0 || col < 0)
+    {
+        return false;
+    }
+    else if(row >= config.height, col >= config.width)
+    {
+        return false;
+    }
+
+    return row * config.width + col;
+}
+
+function initBoard()
+{
+    for(col = 0; col < config.width; col++)
+    {
+        for(row = 0; row < config.height; row++)
+        {
+            //console.log(get1DIndex(row,col));
+            border[get1DIndex(row, col)] = 0;
+
+            if(row == 0 || row == config.height - 1)
+            {
+                border[get1DIndex(row,col)] = 1;
+            }
+
+            if(col == 0 || col == config.width - 1)
+            {
+                border[get1DIndex(row, col)] = 1;
+            }
+        }
+    }
+}
+
+function update ()
+{
     if (gameOver)
     {
         return;
     }
 
-    if (cursors.left.isDown)
+    if(Phaser.Input.Keyboard.JustDown(spacebar) && !isDrawing)
     {
-        player.setVelocityX(-160);
-      
-    }
-    else if (cursors.right.isDown)
-    {
-        player.setVelocityX(160);
-        
-    }
-    else
-    {
-        player.setVelocityX(0);
-      
+        drawMode++;
+        drawMode %= 3;
+        console.log(drawMode);
     }
 
-    if (cursors.up.isDown)
+    handleMove();
+}
+
+function handleMove()
+{
+    let speed = 0;
+    if(drawMode == 0)
     {
-        player.setVelocityY(-160);
-      
+        speed = slowSpeed;
     }
-    else if (cursors.down.isDown)
+    else if(drawMode == 1)
     {
-        player.setVelocityY(160);
-        
+        speed = slowSpeed;
     }
-    else
+    else if(drawMode == 2)
     {
-        player.setVelocityY(0);
-      
+        speed = fastSpeed;
     }
-   
+
+    for(i = 0; i < speed; i++)
+    {
+        let reachedMinPosition = false;
+        var newCol = player.x;
+        var newRow = player.y;
+
+        if (cursors.left.isDown)
+        {
+            newCol -= 1;
+        }
+        else if (cursors.right.isDown)
+        {
+            newCol += 1;
+        }
+        else if (cursors.up.isDown)
+        {
+            newRow -= 1;
+        }
+        else if (cursors.down.isDown)
+        {
+            newRow+=1;
+        }
+        else
+        {
+            return; //if no keys were pressed then do nothing
+        }
+
+        if(drawMode == 0) //;free move mode
+        {
+            if(onBorder(newRow,newCol))
+            {
+                player.x=newCol;
+                player.y=newRow;
+                reachedMinPosition=true;
+            }
+
+        }
+        else //drawing mode
+        {
+            if(!isDrawing)
+            {
+                if(withinScreen(newRow,newCol) && !isCaptured(newRow, newCol)) //Player is leaving a border
+                {
+                    console.log("Starting Drawing");
+                    borderBackup = border.slice(0); //Backup the current borders in case the player dies and this line will be removed
+
+                    player.x = newCol;
+                    player.y = newRow;
+
+                    isDrawing = true;
+                    addPlayerPositionToBorder();
+                }
+                else //stay still this would be an invalid position
+                {
+                    reachedMinPosition=true;
+                }
+            }
+            else//already drawing
+            {
+                if(onBorder(newRow,newCol))//player reached a border
+                {
+                    player.x=newCol;
+                    player.y=newRow;
+                    reachedMinPosition=true;
+                    drawMode=0;
+                    isDrawing=false;
+                    processCapture();
+                }
+                else if(true/*!isTemporary(newRow,newCol)*/)//player is still drawing move them along as long as they don't cross their own path
+                {
+                    //THIS IS TEMPORARY LINE BREAKS THINGS
+                    player.x=newCol;
+                    player.y=newRow;
+                    addPlayerPositionToBorder();
+                }
+            }
+
+            reachedMinPosition=true;
+        }
+    }
+}
+
+function isTemporary(row, col)
+{
+    return border[get1DIndex(player.y, player.x)] == 2;
+}
+
+function addPlayerPositionToBorder() //Adds the current player position onto the border as a temporary point
+{
+    border[get1DIndex(player.y,player.x)] = 2;
+}
+
+function addAllTemporaryBorders()
+{
+    for(col = 0; col < config.width; col++)
+    {
+        for(row = 0;row < config.height; row++)
+        {
+            //console.log(get1DIndex(row,col));
+            if(border[get1DIndex(row, col)] == 2)
+            {
+                border[get1DIndex(row, col)] = 1;
+            }
+        }
+    }
+}
+
+function processCapture()//player has completed a square, process it
+{
+    console.log("Done Drawing!");
+    addAllTemporaryBorders();
+}
+
+function isCaptured(row, col)//Will eventually tell whether this point has been captured
+{
+    return false;
+}
+
+function withinScreen(row, col)
+{
+    if(row < 0 || col < 0)
+    {
+        return false;
+    }
+    else if(row >= config.height, col >= config.width)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+function onBorder(row, col)
+{
+    //console.log(row+" "+col);
+    if( border[get1DIndex(row,col)]==1)
+    {
+        return true;
+    }
+
+    return false;
 }
 
     </script>
-
 </body>
 </html>
