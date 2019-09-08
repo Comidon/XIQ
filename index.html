@@ -30,15 +30,20 @@
     var player;
     var cursors;
     var spacebar;
-    var gameOver = false;
+    var gameOver =false;
     var input;
-    var slowSpeed = 5;
-    var fastSpeed = 2 * slowSpeed;
-    var board = [];
-    var border = [];
-    var borderBackup = [];
-    var drawMode = 0; //0: none 1:slow 2: fast
-    var isDrawing = false;
+    var slowSpeed =5;
+    var fastSpeed=2*slowSpeed;
+    var board=[];
+    var border=[];
+    var borderBackup=[];
+    var drawMode=0; //0: none 1:slow 2: fast
+    var isDrawing=false;
+    var canvas;
+    var whiteColor;
+    var _this;
+    var graphics;
+
 
     function preload ()
     {
@@ -48,10 +53,14 @@
 
     function create ()
     {
+      _this = this;
+      graphics = this.add.graphics({ fillStyle: { color: 0x0000aa } });
+      whiteColor = new Phaser.Display.Color(100, 0, 0);
         cursors = this.input.keyboard.createCursorKeys();
         spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
         keys = this.input.keyboard
         player = this.add.sprite(0, 0, 'player');
+        this.add.rectangle(0, 0, 100, 100, whiteColor.color);
 
         initBoard();
 
@@ -116,6 +125,7 @@ function update ()
     }
 
     handleMove();
+
 }
 
 function handleMove()
@@ -208,6 +218,7 @@ function handleMove()
                     player.x=newCol;
                     player.y=newRow;
                     addPlayerPositionToBorder();
+                    fillPixel(player.x, player.y);
                 }
             }
 
@@ -276,6 +287,13 @@ function onBorder(row, col)
 
     return false;
 }
+
+function fillPixel(x, y)
+{
+  var rect = new Phaser.Geom.Rectangle(x, y, 1, 1);
+  graphics.fillRectShape(rect);
+}
+
 
     </script>
 </body>
