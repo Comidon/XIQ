@@ -238,12 +238,15 @@ function handleMove()
                     drawMode=0;
                     isDrawing=false;
                     processCapture();
-                }else if(isTemporary(newRow,newCol))//player is still drawing move them along as long as they don't cross their own path
+                }else if(!isTemporary(newRow,newCol))//player is still drawing move them along as long as they don't cross their own path
                 {
                     //THIS IS TEMPORARY LINE BREAKS THINGS
                     player.x=newCol;
                     player.y=newRow;
                     addPlayerPositionToBorder();                   
+                }else//stay still this would be an invalid position
+                {
+                    reachedMinPosition=true;
                 }
             }
 
@@ -256,11 +259,12 @@ function handleMove()
 }
 function isTemporary(row, col)
 {
-    return border[get1DIndex(player.y,player.x)]==2;
+    return (border[get1DIndex(row,col)]==2);
 }
 
 function addPlayerPositionToBorder()//Adds the current player position onto the border as a temporary point
 {
+    console.log("adding" +player.x+" "+player.y);
     border[get1DIndex(player.y,player.x)]=2;
     fillPixel(player.x, player.y, drawColor);
 }
