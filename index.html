@@ -44,10 +44,12 @@
     {
         this.load.image('player', 'assets/player.png');
         this.load.image('red', 'assets/red.png');
+
     }
 
     function create ()
     {
+
         cursors = this.input.keyboard.createCursorKeys();
         spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
         keys = this.input.keyboard
@@ -108,7 +110,7 @@ function update ()
         return;
     }
 
-    if(Phaser.Input.Keyboard.JustDown(spacebar) && !isDrawing)
+    if (Phaser.Input.Keyboard.JustDown(spacebar) && !isDrawing)
     {
         drawMode++;
         drawMode %= 3;
@@ -169,7 +171,6 @@ function handleMove()
                 player.y=newRow;
                 reachedMinPosition=true;
             }
-
         }
         else //drawing mode
         {
@@ -276,6 +277,7 @@ function onBorder(row, col)
 
     return false;
 }
+
 
     </script>
 </body>
