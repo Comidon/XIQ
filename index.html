@@ -27,6 +27,13 @@
 
     var game = new Phaser.Game(config);
     var player;
+    var enemy;
+    var enemyWidth;    
+    var enemySpeed=4;
+    var enemyDirectionX=1;
+    var enemyDirectionY=1;
+    var directionChangeCoolDownMax=10;
+    var directionChangeCoolDownTimer;
     var cursors;
     var spacebar;
     var gameOver =false;
@@ -49,6 +56,8 @@
         this.load.image('player', 'assets/player.png');
         this.load.image('red', 'assets/red.png');
 
+        this.load.image('enemy','assets/enemy.png');
+
     }
 
     function create ()
@@ -60,7 +69,9 @@
         spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
         keys = this.input.keyboard
         player = this.add.sprite(0, 0, 'player');
+        enemy= this.add.sprite(config.width/2,config.height/2,'enemy');
         //this.add.rectangle(0, 0, 100, 100, whiteColor.color);
+        enemyWidth = enemy.width;
 
         initBoard();
 
@@ -68,18 +79,83 @@
 
         var emitter = particles.createEmitter({
             speed: 50,
+            scale: { start: .08, end: .01 },
+            blendMode: 'ADD'
+        });
+
+
+        var particles2 = this.add.particles('red');
+
+        var emitter2 = particles2.createEmitter({
+            speed: 50,
             scale: { start: .2, end: .01 },
             blendMode: 'ADD'
         });
 
 
         emitter.startFollow(player);
-
+        emitter2.startFollow(enemy);
         drawBorders();
+       
     }
 
+function updateEnemy()
+{
+    directionChangeCoolDownTimer++;
 
+    for(i=0;i<enemySpeed;i++)
+    {
+        var newCol= enemy.x+enemyDirectionX;
+        var newRow = enemy.y+enemyDirectionY;
 
+//onBorder(newRow,newCol)
+//rectOnBorder(enemy.y-enemyWidth/2,enemy.x-enemyWidth/2,enemyWidth)
+        if(onBorder(newRow,newCol))
+        {
+            if((Math.random()*100)<=50)
+            {
+              enemyDirectionX=-enemyDirectionX;
+             }else
+             {
+             enemyDirectionY=-enemyDirectionY;
+             }
+        }else
+        {
+            enemy.x=newCol;
+            enemy.y=newRow;
+        }
+        
+    }
+        
+    if((Math.random()*100)<=1)
+    {
+        if((Math.random()*100)<=50)
+        {
+            enemyDirectionX=-enemyDirectionX;
+        }else
+        {
+            enemyDirectionY=-enemyDirectionY;
+        }
+    }
+
+    
+}
+
+//THIS IS TOTALLY BROKEN
+function rectOnBorder(topLeftRow, topLeftCol,width)
+{
+    for(i=0;i<width;i++)
+    {
+        for(j=0;j<width;j++)
+        {
+            if(withinScreen(topLeftRow+i,topLeftRow+j) && onBorder(topLeftRow+i,topLeftRow+j))
+            {
+                return true;
+            }            
+        }
+    }
+    return false;
+}
 
 function get1DIndex(row,col)
 {
@@ -132,7 +208,7 @@ function update ()
     }
 
     handleMove();
-   
+    updateEnemy();
 
 }
 
@@ -265,7 +341,7 @@ function isTemporary(row, col)
 
 function addPlayerPositionToBorder()//Adds the current player position onto the border as a temporary point
 {
-    console.log("adding" +player.x+" "+player.y);
+   // console.log("adding" +player.x+" "+player.y);
     border[get1DIndex(player.y,player.x)]=2;
     fillPixel(player.x, player.y, drawColor);
 }
