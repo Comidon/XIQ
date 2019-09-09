@@ -52,6 +52,7 @@
     var borderBackup = [];
     var drawMode = 0; //0: none 1:slow 2: fast
     var isDrawing = false;
+    var playerIsMoving=false;    
     var canvas;
     var whiteColor;
     var _this;
@@ -61,6 +62,9 @@
     var heart1, heart2, heart3;
     var lives = 3;
     var fuse;
+    var fuseMaxLength=100;//how many pixels between the fuse start and the player
+    var fusePositions=[];
+    var fuzeWaitCount=0;
 
     var sparx1;
     var sparx1Dir=0;  
@@ -101,6 +105,10 @@
         sparx1.alpha=0;
         sparx2 = this.add.sprite(config.width-xBorderShift, yBorderShift, 'sparx');
         sparx2.alpha=0;
+
+        fuse = this.add.sprite(-100, -100, 'sparx');
+        fuse.alpha=0;
+
         heart1 = this.add.sprite(320, 25, 'heart');
         heart2 = this.add.sprite(345, 25, 'heart');
         heart3 = this.add.sprite(370, 25, 'heart');
@@ -145,11 +153,21 @@
             blendMode: 'ADD'
         });
 
+         var fusePart = this.add.particles('yellow');
+
+        var fuseEmitter = fusePart.createEmitter({
+            speed: 10,
+            scale: { start: .08, end: .04 },
+            blendMode: 'ADD'
+        });
+
         emitter.startFollow(player);
         emitter2.startFollow(enemy);
 
         sparx1Emitter.startFollow(sparx1);
         sparx2Emitter.startFollow(sparx2);
+
+        fuseEmitter.startFollow(fuse);
 
         drawBorders();
 
@@ -464,6 +482,7 @@ function handleMove()
 
     for(i = 0; i < speed; i++)
     {
+        playerIsMoving=true;
         checkPlayerCollision();
         let reachedMinPosition = false;
         var newCol = player.x;
@@ -487,7 +506,8 @@ function handleMove()
         }
         else
         {
-            return; //if no keys were pressed then do nothing
+            playerIsMoving=false;  
+            break;           
         }
 
         if(drawMode == 0) //;free move mode
@@ -545,6 +565,40 @@ function handleMove()
             reachedMinPosition = true;
         }
     }
+
+if(isDrawing && !playerIsMoving)
+{
+    console.log("Penalty");
+    updateFuse();
+}else
+{
+    hideFuse();
+}
+
+}
+function clearFuse()
+{
+
+}
+function hideFuse()
+{
+    fuse.x=-9999;
+    fuse.y=-9999;
+
+}
+function updateFuse()
+{
+    
+    let newX = fusePositions.shift();
+    let newY=fusePositions.shift();
+    fuse.x=newX;
+    fuse.y=newY 
+      
+      if(fuse.x==player.x && fuse.y == player.y)
+      {
+          killPlayer();
+      }
+
 }
 
 function isTemporary(row, col)
@@ -556,6 +610,15 @@ function addPlayerPositionToBorder() //Adds the current player position onto the
 {
     border[get1DIndex(player.y, player.x)] = 2;
     fillPixel(player.x, player.y, drawColor);
+
+    if(fusePositions.length/2>=fuseMaxLength)
+    {
+        fusePositions.shift();
+        fusePositions.shift();
+    }
+    fusePositions.push(player.x);
+    fusePositions.push(player.y);
+
 }
 
 function addAllTemporaryBorders()
