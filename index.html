@@ -52,7 +52,7 @@
     var borderBackup = [];
     var drawMode = 0; //0: none 1:slow 2: fast
     var isDrawing = false;
-    var playerIsMoving=false;    
+    var playerIsMoving=false;
     var canvas;
     var whiteColor;
     var _this;
@@ -67,7 +67,7 @@
     var fuzeWaitCount=0;
 
     var sparx1;
-    var sparx1Dir=0;  
+    var sparx1Dir=0;
 
     var sparx2;
     var sparx2Dir=0;
@@ -173,7 +173,7 @@
 
     }
 
-    
+
 function update ()
 {
     if (gameOver)
@@ -201,7 +201,7 @@ function updateSparx(sparx, sparxDir)
     let newCol = sparx.x;
 
     if(sparxDir==0)//right
-    {        
+    {
         newCol++;
         if(onBorder(newRow,newCol))
         {
@@ -220,7 +220,7 @@ function updateSparx(sparx, sparxDir)
         }
 
     }else  if(sparxDir==1)//up
-    {       
+    {
         newRow--;
         if(onBorder(newRow,newCol))
         {
@@ -238,7 +238,7 @@ function updateSparx(sparx, sparxDir)
         }
 
     }else  if(sparxDir==2)//left
-    {        
+    {
         newCol--;
         if(onBorder(newRow,newCol))
         {
@@ -256,7 +256,7 @@ function updateSparx(sparx, sparxDir)
         }
 
     }else if(sparxDir==3)//down
-    {       
+    {
         newRow++;
         if(onBorder(newRow,newCol))
         {
@@ -319,7 +319,7 @@ function updateEnemy()
         }
     }
 
-    
+
 
 
 }
@@ -436,7 +436,7 @@ function checkPlayerCollision()
         killPlayer();
     }
 
-    
+
     if(sparx2.x==player.x && sparx2.y == player.y)
     {
         killPlayer();
@@ -477,7 +477,7 @@ function handleMove()
     {
         speed = fastSpeed;
         drawColor = 0x0000FF;
-        
+
     }
 
     for(i = 0; i < speed; i++)
@@ -506,8 +506,8 @@ function handleMove()
         }
         else
         {
-            playerIsMoving=false;  
-            break;           
+            playerIsMoving=false;
+            break;
         }
 
         if(drawMode == 0) //;free move mode
@@ -588,12 +588,12 @@ function hideFuse()
 }
 function updateFuse()
 {
-    
+
     let newX = fusePositions.shift();
     let newY=fusePositions.shift();
     fuse.x=newX;
-    fuse.y=newY 
-      
+    fuse.y=newY
+
       if(fuse.x==player.x && fuse.y == player.y)
       {
           killPlayer();
@@ -843,6 +843,241 @@ function killPlayer()
     enemySpeed=0;
 }
 
+function floodFill(x, y)
+{
+  if (onBorder(y, x))
+  {
+    return;
+  }
+
+  graphics.fillPoint(x, y);
+
+  var queue = [];
+  var set = [];
+
+  queue.push(x);
+  queue.push(y);
+
+  set[get1DIndex(y, x)] = 1;
+
+  var shapeBorderSet = [];
+  var startingX;
+  var startingY;
+
+  while (queue.length > 0)
+  {
+    var tempX = queue.shift();
+    var tempY = queue.shift();
+
+    if (!onBorder(tempY + 1, tempX) && set[get1DIndex(tempY + 1, tempX)] != 1)
+    {
+      //graphics.fillPoint(tempX, tempY + 1);
+      set[get1DIndex(tempY + 1, tempX)] = 1;
+      queue.push(tempX);
+      queue.push(tempY + 1);
+    }
+    else if (onBorder(tempY + 1, tempX))
+    {
+      shapeBorderSet[get1DIndex(tempY, tempX)] = 1;
+      startingX = tempX;
+      startingY = tempY;
+    }
+
+    if (!onBorder(tempY - 1, tempX) && set[get1DIndex(tempY - 1, tempX)] != 1)
+    {
+      //graphics.fillPoint(tempX, tempY - 1);
+      set[get1DIndex(tempY - 1, tempX)] = 1;
+      queue.push(tempX);
+      queue.push(tempY - 1);
+    }
+    else if (onBorder(tempY - 1, tempX))
+    {
+      shapeBorderSet[get1DIndex(tempY, tempX)] = 1;
+      startingX = tempX;
+      startingY = tempY;
+    }
+
+    if (!onBorder(tempY, tempX + 1) && set[get1DIndex(tempY, tempX + 1)] != 1)
+    {
+      //graphics.fillPoint(tempX + 1, tempY);
+      set[get1DIndex(tempY, tempX + 1)] = 1;
+      queue.push(tempX + 1);
+      queue.push(tempY);
+    }
+    else if (onBorder(tempY, tempX + 1))
+    {
+      shapeBorderSet[get1DIndex(tempY, tempX)] = 1;
+      startingX = tempX;
+      startingY = tempY;
+    }
+
+    if (!onBorder(tempY, tempX - 1) && set[get1DIndex(tempY, tempX - 1)] != 1)
+    {
+      //graphics.fillPoint(tempX - 1, tempY);
+      set[get1DIndex(tempY, tempX - 1)] = 1;
+      queue.push(tempX - 1);
+      queue.push(tempY);
+    }
+    else if (onBorder(tempY, tempX - 1))
+    {
+      shapeBorderSet[get1DIndex(tempY, tempX)] = 1;
+      startingX = tempX;
+      startingY = tempY;
+    }
+  }
+
+  var checkingDir;
+  var runningX;
+  var runningY;
+
+  console.log(startingX);
+  console.log(startingY);
+
+  if (shapeBorderSet[get1DIndex(startingY, startingX + 1)] == 1)
+  {
+    console.log("right");
+    checkingDir = 0;
+    runningX = startingX + 1;
+    runningY = startingY;
+  }
+  else if (shapeBorderSet[get1DIndex(startingY, startingX - 1)] == 1)
+  {
+    console.log("left");
+    checkingDir = 1;
+    runningX = startingX - 1;
+    runningY = startingY;
+  }
+  else if (shapeBorderSet[get1DIndex(startingY + 1, startingX)] == 1)
+  {
+    console.log("up");
+    checkingDir = 2;
+    runningX = startingX;
+    runningY = startingY + 1;
+  }
+  else if (shapeBorderSet[get1DIndex(startingY - 1, startingX)] == 1)
+  {
+    console.log("down");
+    checkingDir = 3;
+    runningX = startingX;
+    runningY = startingY - 1;
+  }
+
+  var corners = [];
+
+  corners.push(new Phaser.Geom.Point(startingX, startingY));
+
+  while (!((startingX == runningX) && (startingY == runningY)))
+  {
+    if (checkingDir == 0)
+    {
+      if (shapeBorderSet[get1DIndex(runningY, runningX + 1)] != 1)
+      {
+        corners.push(new Phaser.Geom.Point(runningX, runningY));
+        if (shapeBorderSet[get1DIndex(runningY + 1, runningX)] == 1)
+        {
+          console.log("up");
+          runningY++;
+          checkingDir = 2;
+        }
+        else if (shapeBorderSet[get1DIndex(runningY - 1, runningX)] == 1)
+        {
+          console.log("down");
+          runningY--;
+          checkingDir = 3;
+        }
+        else{
+          runningX++;
+        }
+      }
+      else if (shapeBorderSet[get1DIndex(runningY, runningX + 1)] == 1)
+      {
+        runningX++;
+      }
+    }
+    else if (checkingDir == 1)
+    {
+      if (shapeBorderSet[get1DIndex(runningY, runningX - 1)] != 1)
+      {
+        corners.push(new Phaser.Geom.Point(runningX, runningY));
+        if (shapeBorderSet[get1DIndex(runningY + 1, runningX)] == 1)
+        {
+          console.log("up");
+          runningY++;
+          checkingDir = 2;
+        }
+        else if (shapeBorderSet[get1DIndex(runningY - 1, runningX)] == 1)
+        {
+          console.log("down");
+          runningY--;
+          checkingDir = 3;
+        }
+        else{
+          runningX--;
+        }
+      }
+      else
+      {
+        runningX--;
+      }
+    }
+    else if (checkingDir == 2)
+    {
+      if (shapeBorderSet[get1DIndex(runningY + 1, runningX)] != 1)
+      {
+        corners.push(new Phaser.Geom.Point(runningX, runningY));
+        if (shapeBorderSet[get1DIndex(runningY, runningX + 1)] == 1)
+        {
+          console.log("right");
+          runningX++;
+          checkingDir = 0;
+        }
+        else if (shapeBorderSet[get1DIndex(runningY, runningX - 1)] == 1)
+        {
+          console.log("left");
+          runningX--;
+          checkingDir = 1;
+        }
+        else {
+          runningY++;
+        }
+      }
+      else
+      {
+        runningY++;
+      }
+    }
+    else if (checkingDir == 3)
+    {
+      if (shapeBorderSet[get1DIndex(runningY - 1, runningX)] != 1)
+      {
+        corners.push(new Phaser.Geom.Point(runningX, runningY));
+        if (shapeBorderSet[get1DIndex(runningY, runningX + 1)] == 1)
+        {
+          console.log("right");
+          runningX++;
+          checkingDir = 0;
+        }
+        else if (shapeBorderSet[get1DIndex(runningY, runningX - 1)] == 1)
+        {
+          console.log("left");
+          runningX--;
+          checkingDir = 1;
+        }
+        else {
+          runningY--;
+        }
+      }
+      else
+      {
+        runningY--;
+      }
+    }
+  }
+
+  console.log(corners.length);
+
+  graphics.fillPoints(corners, true);
+}
     </script>
 </body>
 </html>
