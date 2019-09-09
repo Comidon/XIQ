@@ -76,6 +76,8 @@
     {
         this.load.image('player', 'assets/player.png');
         this.load.image('red', 'assets/red.png');
+        this.load.image('green', 'assets/green.png');
+        this.load.image('yellow', 'assets/yellow.png');
         this.load.image('enemy','assets/enemy.png');
         this.load.image('sparx','assets/sparx.png')
         this.load.image('heart', 'assets/heart.jpg');
@@ -92,9 +94,13 @@
 
         player = this.add.sprite(xBorderShift, yBorderShift, 'player');
         enemy= this.add.sprite(config.width/2,config.height/2,'enemy');
+        enemy.alpha=0;
+        player.alpha=0;
 
         sparx1 = this.add.sprite(xBorderShift, config.height-yBorderShift, 'sparx');
+        sparx1.alpha=0;
         sparx2 = this.add.sprite(config.width-xBorderShift, yBorderShift, 'sparx');
+        sparx2.alpha=0;
         heart1 = this.add.sprite(320, 25, 'heart');
         heart2 = this.add.sprite(345, 25, 'heart');
         heart3 = this.add.sprite(370, 25, 'heart');
@@ -107,10 +113,10 @@
 
         initBoard();
 
-        var particles = this.add.particles('red');
+        var particles = this.add.particles('green');
         var emitter = particles.createEmitter({
             speed: 50,
-            scale: { start: .08, end: .01 },
+            scale: { start: .2, end: .02 },
             blendMode: 'ADD'
         });
 
@@ -118,13 +124,33 @@
         var particles2 = this.add.particles('red');
 
         var emitter2 = particles2.createEmitter({
-            speed: 50,
-            scale: { start: .2, end: .01 },
+            speed: 15,
+            scale: { start: .5, end: .01 },
+            blendMode: 'ADD'
+        });
+
+          var sparx1Part = this.add.particles('yellow');
+
+        var sparx1Emitter = sparx1Part.createEmitter({
+            speed: 3,
+            scale: { start: .08, end: .04 },
+            blendMode: 'ADD'
+        });
+
+        var sparx2Part = this.add.particles('yellow');
+
+        var sparx2Emitter = sparx2Part.createEmitter({
+            speed: 3,
+            scale: { start: .08, end: .04 },
             blendMode: 'ADD'
         });
 
         emitter.startFollow(player);
         emitter2.startFollow(enemy);
+
+        sparx1Emitter.startFollow(sparx1);
+        sparx2Emitter.startFollow(sparx2);
+
         drawBorders();
 
     }
@@ -258,6 +284,10 @@ function updateEnemy()
             enemy.y=newRow;
         }
 
+        if(isTemporary(enemy.y,enemy.x))
+        {
+            killPlayer();
+        }
     }
 
     if((Math.random()*100)<=1)
@@ -270,6 +300,8 @@ function updateEnemy()
             enemyDirectionY=-enemyDirectionY;
         }
     }
+
+    
 
 
 }
