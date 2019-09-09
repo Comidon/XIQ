@@ -45,7 +45,7 @@
     var spacebar;
     var gameOver = false;
     var input;
-    var slowSpeed = 5;
+    var slowSpeed = 2;
     var fastSpeed = 2 * slowSpeed;
     var board = [];
     var border = [];
@@ -448,17 +448,18 @@ function handleMove()
     let speed = 0;
     if(drawMode == 0)
     {
-        speed = slowSpeed;
+        speed = fastSpeed;
     }
     else if(drawMode == 1)
     {
         speed = slowSpeed;
-        drawColor = 0x0000FF;
+        drawColor = 0xFF0000;
     }
     else if(drawMode == 2)
     {
         speed = fastSpeed;
-        drawColor = 0xFF0000;
+        drawColor = 0x0000FF;
+        
     }
 
     for(i = 0; i < speed; i++)
