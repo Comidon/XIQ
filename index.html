@@ -28,8 +28,8 @@
 
     var game = new Phaser.Game(config);
 
-    var xBorderShift=10;//how far in to shift the game board from the screen width
-    var yBorderShift=35;
+    var xBorderShift=5;//how far in to shift the game board from the screen width
+    var yBorderShift=5;
 
 
     var player;
@@ -55,12 +55,16 @@
     var graphics;
     var drawColor =0xFFFFFF;
 
+    var sparx1;
+    var sparx2;
+
     function preload ()
     {
         this.load.image('player', 'assets/player.png');
         this.load.image('red', 'assets/red.png');
 
         this.load.image('enemy','assets/enemy.png');
+        this.load.image('sparx','assets/sparx.png')
 
     }
 
@@ -74,6 +78,12 @@
         keys = this.input.keyboard
         player = this.add.sprite(xBorderShift, yBorderShift, 'player');
         enemy= this.add.sprite(config.width/2,config.height/2,'enemy');
+
+        sparx1 = this.add.sprite(xBorderShift, config.height-yBorderShift, 'sparx');
+        sparx2 = this.add.sprite(config.width-xBorderShift, yBorderShift, 'sparx');
+
+
+
         //this.add.rectangle(0, 0, 100, 100, whiteColor.color);
         enemyWidth = enemy.width;
 
@@ -100,6 +110,8 @@
         drawBorders();
        
     }
+
+
 
 function updateEnemy()
 {
@@ -175,6 +187,24 @@ function get1DIndex(row,col)
 function initBoard()
 {
   
+    for(col = 0; col < config.width; col++)
+    {
+        for(row = 0; row < config.height; row++)
+        {
+            //console.log(get1DIndex(row,col));
+            border[get1DIndex(row, col)] = 0;
+
+            if(row == 0 || row == config.height - 1)
+            {
+                border[get1DIndex(row,col)] = 1;
+            }
+
+            if(col == 0 || col == config.width - 1)
+            {
+                border[get1DIndex(row, col)] = 1;
+            }
+        }
+    }
 
     // Drawing border
     graphics.lineStyle(2, 0xFFFFFF, 1.0);
@@ -225,24 +255,7 @@ function initBoard()
 
 
 
-    // for(col = 0; col < config.width; col++)
-    // {
-    //     for(row = 0; row < config.height; row++)
-    //     {
-    //         //console.log(get1DIndex(row,col));
-    //         border[get1DIndex(row, col)] = 0;
-
-    //         if(row == 0 || row == config.height - 1)
-    //         {
-    //             border[get1DIndex(row,col)] = 1;
-    //         }
-
-    //         if(col == 0 || col == config.width - 1)
-    //         {
-    //             border[get1DIndex(row, col)] = 1;
-    //         }
-    //     }
-    // }
+  
 }
 
 function update ()
@@ -413,8 +426,155 @@ function addAllTemporaryBorders()
 
 function processCapture()//player has completed a square, process it
 {
-    console.log("Done Drawing!");
-    addAllTemporaryBorders();
+    console.log("Done Drawing!");  
+    addAllTemporaryBorders();  
+    recalcBorders();
+   printBorders();
+}
+function recalcBorders()
+{
+    let borderCopy = border.slice(0);//backup the border
+
+    let newBorders =borderFloodFill(borderCopy,enemy.y,enemy.x);
+    //console.log(newBorders.length);
+
+    for(col = 0; col < config.width; col++)
+    {
+        for(row = 0;row < config.height; row++)
+        {
+          border[get1DIndex(row,col)]=0;
+        }
+    }
+
+    while(newBorders.length>0)
+    {
+        let newY = newBorders.pop();
+        let newX = newBorders.pop();
+        border[get1DIndex(newY,newX)]=1;
+    }
+
+}
+
+function borderFloodFill(data,row,col)
+{
+    let replaceVal=3;
+
+    data[get1DIndex(row,col)]=replaceVal;
+    let Qx=[];
+    let Qy=[];
+
+    let newBorders = [];
+
+    Qx.push(col);
+    Qy.push(row);
+
+    while(!Qx.length==0 && !Qy.length==0)
+    {
+       
+        let nx = Qx.shift();
+        let ny = Qy.shift();
+       
+
+        let north = ny-1;
+        let south = ny+1;
+        let east = nx+1;
+        let west = nx-1;
+        
+        if(data[get1DIndex(north,nx)]==1)//if a neighbor is a border it is part of the new borders
+        {           
+            newBorders.push(nx);
+            newBorders.push(north);
+
+        }else if (data[get1DIndex(north,nx)]==0)//otherwise keep floodfilling
+        {
+            data[get1DIndex(north,nx)]=replaceVal;
+            Qx.push(nx);
+            Qy.push(north);
+        }
+
+        if(data[get1DIndex(south,nx)]==1)
+        {
+            newBorders.push(nx);
+            newBorders.push(south);
+        }else if(data[get1DIndex(south,nx)]==0)
+        {
+            data[get1DIndex(south,nx)]=replaceVal;
+            Qx.push(nx);
+            Qy.push(south);
+        }
+
+        if(data[get1DIndex(ny,east)]==1)
+        {
+            newBorders.push(east);
+            newBorders.push(ny);
+
+        }else if(data[get1DIndex(ny,east)]==0)
+        {
+            data[get1DIndex(ny,east)]=replaceVal;
+            Qx.push(east);
+            Qy.push(ny);
+        }
+
+        if(data[get1DIndex(ny,west)]==1)
+        {
+            newBorders.push(west);
+            newBorders.push(ny);
+        }else  if(data[get1DIndex(ny,west)]==0)
+        {
+            data[get1DIndex(ny,west)]=replaceVal;
+            Qx.push(west);
+            Qy.push(ny);
+        }
+
+        
+        if(data[get1DIndex(north,west)]==1)
+        {
+            newBorders.push(west);
+            newBorders.push(north);
+        }
+
+         
+        if(data[get1DIndex(north,east)]==1)
+        {
+            newBorders.push(east);
+            newBorders.push(north);
+        }
+
+          
+        if(data[get1DIndex(south,east)]==1)
+        {
+            newBorders.push(east);
+            newBorders.push(south);
+        }
+
+        if(data[get1DIndex(south,west)]==1)
+        {
+            newBorders.push(west);
+            newBorders.push(south);
+        }
+
+
+
+
+
+    }  
+    return newBorders;
+    
+}
+
+
+function printBorders()
+{
+    for(col = 0; col < config.width; col++)
+    {
+        for(row = 0;row < config.height; row++)
+        {
+          if(border[get1DIndex(row,col)]==1)
+          {
+              console.log(row+" "+col);
+          }
+        }
+    }
 }
 
 function isCaptured(row, col)//Will eventually tell whether this point has been captured
