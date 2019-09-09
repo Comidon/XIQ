@@ -428,7 +428,7 @@ function withinScreen(row, col)
     {
         return false;
     }
-    else if(row >= config.height-yBorderShift, col >= config.width-xBorderShift)
+    else if(row >= config.height-yBorderShift || col >= config.width-xBorderShift)
     {
         return false;
     }
