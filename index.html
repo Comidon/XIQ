@@ -10,7 +10,7 @@
     var config = {
         type: Phaser.AUTO,
         width: 500,
-        height: 500,
+        height: 510,
         physics: {
             default: 'arcade',
             arcade: {
@@ -31,10 +31,9 @@
     var xBorderShift=5;//how far in to shift the game board from the screen width
     var yBorderShift=5;
 
-
     var player;
     var enemy;
-    var enemyWidth;    
+    var enemyWidth;
     var enemySpeed=4;
     var enemyDirectionX=1;
     var enemyDirectionY=1;
@@ -53,7 +52,8 @@
     var whiteColor;
     var _this;
     var graphics;
-    var drawColor =0xFFFFFF;
+    var drawColor = 0xFFFFFF;
+    var score = 0;
 
     var sparx1;
     var sparx2;
@@ -62,11 +62,12 @@
     {
         this.load.image('player', 'assets/player.png');
         this.load.image('red', 'assets/red.png');
-
         this.load.image('enemy','assets/enemy.png');
         this.load.image('sparx','assets/sparx.png')
 
     }
+
+    var bpmText;
 
     function create ()
     {
@@ -76,6 +77,7 @@
         cursors = this.input.keyboard.createCursorKeys();
         spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
         keys = this.input.keyboard
+
         player = this.add.sprite(xBorderShift, yBorderShift, 'player');
         enemy= this.add.sprite(config.width/2,config.height/2,'enemy');
 
@@ -86,6 +88,9 @@
 
         //this.add.rectangle(0, 0, 100, 100, whiteColor.color);
         enemyWidth = enemy.width;
+
+        //  The score
+        scoreText = this.add.text(420, 5, '00', { font: '40px monospace', fill: '#ffffff' });
 
         initBoard();
 
@@ -108,14 +113,14 @@
         emitter.startFollow(player);
         emitter2.startFollow(enemy);
         drawBorders();
-       
+
     }
 
 
 
 function updateEnemy()
 {
-    
+
     for(i=0;i<enemySpeed;i++)
     {
         var newCol= enemy.x+enemyDirectionX;
@@ -137,9 +142,9 @@ function updateEnemy()
             enemy.x=newCol;
             enemy.y=newRow;
         }
-        
+
     }
-        
+
     if((Math.random()*100)<=1)
     {
         if((Math.random()*100)<=50)
@@ -151,7 +156,7 @@ function updateEnemy()
         }
     }
 
-    
+
 }
 
 //THIS IS TOTALLY BROKEN
@@ -164,7 +169,7 @@ function rectOnBorder(topLeftRow, topLeftCol,width)
             if(withinScreen(topLeftRow+i,topLeftRow+j) && onBorder(topLeftRow+i,topLeftRow+j))
             {
                 return true;
-            }            
+            }
         }
     }
     return false;
@@ -235,7 +240,7 @@ function initBoard()
 
     for(i=xBorderShift;i<config.width-xBorderShift;i++)
     {
-        border[get1DIndex(yBorderShift, i)] = 1;        
+        border[get1DIndex(yBorderShift, i)] = 1;
     }
 
     for(i=yBorderShift;i<config.height-yBorderShift;i++)
@@ -319,21 +324,21 @@ function handleMove()
         var newCol = player.x;
         var newRow = player.y;
 
-        if (cursors.left.isDown )
+        if (cursors.left.isDown)
         {
             newCol -= 1;
         }
-        else if (cursors.right.isDown )
+        else if (cursors.right.isDown)
         {
             newCol += 1;
         }
-        else if (cursors.up.isDown )
+        else if (cursors.up.isDown)
         {
             newRow -= 1;
         }
-        else if (cursors.down.isDown )
+        else if (cursors.down.isDown)
         {
-            newRow+=1;
+            newRow += 1;
         }
         else
         {
@@ -385,7 +390,7 @@ function handleMove()
                     //THIS IS TEMPORARY LINE BREAKS THINGS
                     player.x=newCol;
                     player.y=newRow;
-                    addPlayerPositionToBorder();                   
+                    addPlayerPositionToBorder();
                 }else//stay still this would be an invalid position
                 {
                     reachedMinPosition=true;
@@ -404,8 +409,7 @@ function isTemporary(row, col)
 
 function addPlayerPositionToBorder() //Adds the current player position onto the border as a temporary point
 {
-   // console.log("adding" +player.x+" "+player.y);
-    border[get1DIndex(player.y,player.x)]=2;
+    border[get1DIndex(player.y, player.x)] = 2;
     fillPixel(player.x, player.y, drawColor);
 }
 
