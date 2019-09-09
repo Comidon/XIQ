@@ -28,8 +28,8 @@
 
     var game = new Phaser.Game(config);
 
-    var xShift=10;//how far in to shift the game board from the screen width
-    var yShift=35;
+    var xBorderShift=10;//how far in to shift the game board from the screen width
+    var yBorderShift=35;
 
 
     var player;
@@ -72,7 +72,7 @@
         cursors = this.input.keyboard.createCursorKeys();
         spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
         keys = this.input.keyboard
-        player = this.add.sprite(xShift, yShift, 'player');
+        player = this.add.sprite(xBorderShift, yBorderShift, 'player');
         enemy= this.add.sprite(config.width/2,config.height/2,'enemy');
         //this.add.rectangle(0, 0, 100, 100, whiteColor.color);
         enemyWidth = enemy.width;
@@ -179,48 +179,48 @@ function initBoard()
     // Drawing border
     graphics.lineStyle(2, 0xFFFFFF, 1.0);
     graphics.beginPath();
-    graphics.moveTo(xShift,yShift);
-    graphics.lineTo(xShift, config.height-yShift);
+    graphics.moveTo(xBorderShift,yBorderShift);
+    graphics.lineTo(xBorderShift, config.height-yBorderShift);
     graphics.closePath();
     graphics.strokePath();
     graphics.lineStyle(2, 0xFFFFFF, 1.0);
     graphics.beginPath();
-    graphics.moveTo(xShift,yShift);
-    graphics.lineTo(config.width-xShift, yShift);
+    graphics.moveTo(xBorderShift,yBorderShift);
+    graphics.lineTo(config.width-xBorderShift, yBorderShift);
     graphics.closePath();
     graphics.strokePath();
     graphics.lineStyle(2, 0xFFFFFF, 1.0);
     graphics.beginPath();
-    graphics.moveTo(config.width-xShift, yShift);
-    graphics.lineTo(config.width-xShift, config.height-yShift);
+    graphics.moveTo(config.width-xBorderShift, yBorderShift);
+    graphics.lineTo(config.width-xBorderShift, config.height-yBorderShift);
     graphics.closePath();
     graphics.strokePath();
     graphics.lineStyle(2, 0xFFFFFF, 1.0);
     graphics.beginPath();
-    graphics.moveTo(config.width-xShift, config.height-yShift);
-    graphics.lineTo(xShift, config.height-yShift);
+    graphics.moveTo(config.width-xBorderShift, config.height-yBorderShift);
+    graphics.lineTo(xBorderShift, config.height-yBorderShift);
     graphics.closePath();
     graphics.strokePath();
 
 
-    for(i=xShift;i<config.width-xShift;i++)
+    for(i=xBorderShift;i<config.width-xBorderShift;i++)
     {
-        border[get1DIndex(yShift, i)] = 1;        
+        border[get1DIndex(yBorderShift, i)] = 1;        
     }
 
-    for(i=yShift;i<config.height-yShift;i++)
+    for(i=yBorderShift;i<config.height-yBorderShift;i++)
     {
-        border[get1DIndex(i, xShift)] = 1;
+        border[get1DIndex(i, xBorderShift)] = 1;
     }
 
-    for(i=yShift;i<config.height-yShift;i++)
+    for(i=yBorderShift;i<config.height-yBorderShift;i++)
     {
-        border[get1DIndex(i, config.width-xShift)] = 1;
+        border[get1DIndex(i, config.width-xBorderShift)] = 1;
     }
 
-    for(i=xShift;i<=config.width-xShift;i++)
+    for(i=xBorderShift;i<=config.width-xBorderShift;i++)
     {
-        border[get1DIndex(config.height-yShift, i)] = 1;
+        border[get1DIndex(config.height-yBorderShift, i)] = 1;
     }
 
 
@@ -424,11 +424,11 @@ function isCaptured(row, col)//Will eventually tell whether this point has been 
 
 function withinScreen(row, col)
 {
-    if(row < yShift || col < xShift)
+    if(row < yBorderShift || col < xBorderShift)
     {
         return false;
     }
-    else if(row >= config.height-yShift, col >= config.width-xShift)
+    else if(row >= config.height-yBorderShift, col >= config.width-xBorderShift)
     {
         return false;
     }
