@@ -4,6 +4,10 @@
     <title>QIX Clone</title>
  <script src="https://cdn.jsdelivr.net/npm/phaser@3.15.1/dist/phaser-arcade-physics.min.js"></script>
 </head>
+<style>
+.imgbox {
+}
+</style>
 <body>
     <script type="text/javascript">
 
@@ -54,6 +58,9 @@
     var graphics;
     var drawColor = 0xFFFFFF;
     var score = 0;
+    var heart1, heart2, heart3;
+    var lives = 3;
+    var fuse;
 
     var sparx1;
     var sparx1Dir=0;
@@ -62,16 +69,18 @@
     var sparx2;
     var sparx2Dir=1;
 
+    // TO GO: in the pixel filler to update score according to conquered pixel spaces
+    //
+    //scoreText.setText(score += pixelNum);
+
     function preload ()
     {
         this.load.image('player', 'assets/player.png');
         this.load.image('red', 'assets/red.png');
         this.load.image('enemy','assets/enemy.png');
         this.load.image('sparx','assets/sparx.png')
-
+        this.load.image('heart', 'assets/heart.jpg');
     }
-
-    var bpmText;
 
     function create ()
     {
@@ -87,8 +96,9 @@
 
         sparx1 = this.add.sprite(xBorderShift, config.height-yBorderShift, 'sparx');
         sparx2 = this.add.sprite(config.width-xBorderShift, yBorderShift, 'sparx');
-
-
+        heart1 = this.add.sprite(320, 25, 'heart');
+        heart2 = this.add.sprite(345, 25, 'heart');
+        heart3 = this.add.sprite(370, 25, 'heart');
 
         //this.add.rectangle(0, 0, 100, 100, whiteColor.color);
         enemyWidth = enemy.width;
@@ -121,13 +131,13 @@
     }
 
 function updateSparx()
-{   
+{
 
     // 0 right 1 down 2left 3 up
     let newRow = sparx1.y;
     let newCol = sparx1.x;
 
-    
+
     if(sparx1Dir==0)//right
     {
         console.log("Right");
@@ -206,7 +216,7 @@ function updateSparx()
 
     }
 
-   
+
 }
 
 function updateEnemy()
@@ -282,7 +292,7 @@ function get1DIndex(row,col)
 
 function initBoard()
 {
-  
+
     for(col = 0; col < config.width; col++)
     {
         for(row = 0; row < config.height; row++)
@@ -351,7 +361,7 @@ function initBoard()
 
 
 
-  
+
 }
 
 function update ()
@@ -522,8 +532,8 @@ function addAllTemporaryBorders()
 
 function processCapture()//player has completed a square, process it
 {
-    console.log("Done Drawing!");  
-    addAllTemporaryBorders();  
+    console.log("Done Drawing!");
+    addAllTemporaryBorders();
     recalcBorders();
    //printBorders();
 }
@@ -566,18 +576,18 @@ function borderFloodFill(data,row,col)
 
     while(!Qx.length==0 && !Qy.length==0)
     {
-       
+
         let nx = Qx.shift();
         let ny = Qy.shift();
-       
+
 
         let north = ny-1;
         let south = ny+1;
         let east = nx+1;
         let west = nx-1;
-        
+
         if(data[get1DIndex(north,nx)]==1)//if a neighbor is a border it is part of the new borders
-        {           
+        {
             newBorders.push(nx);
             newBorders.push(north);
 
@@ -622,21 +632,21 @@ function borderFloodFill(data,row,col)
             Qy.push(ny);
         }
 
-        
+
         if(data[get1DIndex(north,west)]==1)
         {
             newBorders.push(west);
             newBorders.push(north);
         }
 
-         
+
         if(data[get1DIndex(north,east)]==1)
         {
             newBorders.push(east);
             newBorders.push(north);
         }
 
-          
+
         if(data[get1DIndex(south,east)]==1)
         {
             newBorders.push(east);
@@ -653,9 +663,9 @@ function borderFloodFill(data,row,col)
 
 
 
-    }  
+    }
     return newBorders;
-    
+
 }
 
 
@@ -710,6 +720,14 @@ function fillPixel(x, y, color)
   graphics.fillRectShape(rect);
 }
 
+// Hides heart when life is lost; use imgID
+function removeImg(imgID) {
+  document.getElementById(imgID).style.visibility = "hidden";
+}
+// Hearts become visible agaain; use imgID
+function resetImg(imgID) {
+  document.getElementById(imgID).style.visibility = "visible";
+}
 
     </script>
 </body>
