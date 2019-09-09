@@ -63,11 +63,10 @@
     var fuse;
 
     var sparx1;
-    var sparx1Dir=0;
-    var sparx1Step=1;
+    var sparx1Dir=0;  
 
     var sparx2;
-    var sparx2Dir=1;
+    var sparx2Dir=0;
 
     // TO GO: in the pixel filler to update score according to conquered pixel spaces
     //
@@ -130,93 +129,108 @@
 
     }
 
-function updateSparx()
+    
+function update ()
 {
-
-    // 0 right 1 down 2left 3 up
-    let newRow = sparx1.y;
-    let newCol = sparx1.x;
-
-
-    if(sparx1Dir==0)//right
+    if (gameOver)
     {
-        console.log("Right");
+        return;
+    }
+
+    if(Phaser.Input.Keyboard.JustDown(spacebar) && !isDrawing)
+    {
+        drawMode++;
+        drawMode %= 3;
+        console.log(drawMode);
+    }
+
+    handleMove();
+    updateEnemy();
+   sparx1Dir= updateSparx(sparx1, sparx1Dir);
+   sparx2Dir= updateSparx(sparx2, sparx2Dir);
+}
+
+function updateSparx(sparx, sparxDir)
+{
+ // 0 right 1 down 2left 3 up
+ let newRow = sparx.y;
+    let newCol = sparx.x;
+
+    if(sparxDir==0)//right
+    {        
         newCol++;
         if(onBorder(newRow,newCol))
         {
-            sparx1.x=newCol;
+            sparx.x=newCol;
+            sparx1Dir;
 
         }else
         {
-           if(onBorder(sparx1.y+1, sparx1.x))//check up
+           if(onBorder(sparx.y-1, sparx.x))//check up
            {
-            sparx1Dir=1;
-           }else if(onBorder(sparx1.y-1, sparx1.x))
+            sparxDir=1;
+           }else if(onBorder(sparx.y+1, sparx.x))
            {
-            sparx1Dir=3;
+            sparxDir=3;
            }
         }
 
-    }else  if(sparx1Dir==1)//up
-    {
-        console.log("up");
+    }else  if(sparxDir==1)//up
+    {       
         newRow--;
         if(onBorder(newRow,newCol))
         {
-            sparx1.y=newRow;
+            sparx.y=newRow;
 
         }else
         {
-            if(onBorder(sparx1.y, sparx1.x+1))//check RIGHT
+            if(onBorder(sparx.y, sparx.x-1))//check LEFT
            {
-            sparx1Dir=0;
-           }else if(onBorder(sparx1.y, sparx1.x-1))
+            sparxDir=2;
+           }else if(onBorder(sparx.y, sparx.x+1))
            {
-            sparx1Dir=2;
+            sparxDir=0;
            }
         }
 
-    }else  if(sparx1Dir==2)//left
-    {
-        console.log("left");
+    }else  if(sparxDir==2)//left
+    {        
         newCol--;
         if(onBorder(newRow,newCol))
         {
-            sparx1.x=newCol;
+            sparx.x=newCol;
 
         }else
         {
-            if(onBorder(sparx1.y+1, sparx1.x))//check down
+            if(onBorder(sparx.y+1, sparx.x))//check down
            {
-            sparx1Dir=3;
-           }else if(onBorder(sparx1.y-1, sparx1.x))
+            sparxDir=3;
+           }else if(onBorder(sparx.y-1, sparx.x))
            {
-            sparx1Dir=1;
+            sparxDir=1;
            }
         }
 
-    }else if(sparx1Dir==3)//down
-    {
-        console.log("Down");
+    }else if(sparxDir==3)//down
+    {       
         newRow++;
         if(onBorder(newRow,newCol))
         {
-            sparx1.y=newRow;
+            sparx.y=newRow;
 
         }else
         {
-            if(onBorder(sparx1.y, sparx1.x-1))//check left
+            if(onBorder(sparx.y, sparx.x-1))//check left
            {
-            sparx1Dir=2;
-           }else if(onBorder(sparx1.y, sparx1.x+1))
+            sparxDir=2;
+           }else if(onBorder(sparx.y, sparx.x+1))
            {
-            sparx1Dir=0;
+            sparxDir=0;
            }
         }
 
     }
-
-
+    return sparxDir;
 }
 
 function updateEnemy()
@@ -364,26 +378,21 @@ function initBoard()
 
 }
 
-function update ()
+
+function checkPlayerCollision()
 {
-    if (gameOver)
+    if(sparx1.x==player.x && sparx1.y == player.y)
     {
-        return;
+        killPlayer();
     }
 
-    if(Phaser.Input.Keyboard.JustDown(spacebar) && !isDrawing)
+    
+    if(sparx2.x==player.x && sparx2.y == player.y)
     {
-        drawMode++;
-        drawMode %= 3;
-        console.log(drawMode);
+        killPlayer();
     }
-
-    handleMove();
-    updateEnemy();
-    updateSparx();
-
-
 }
+
 
 function drawBorders()
 {
@@ -422,6 +431,7 @@ function handleMove()
 
     for(i = 0; i < speed; i++)
     {
+        checkPlayerCollision();
         let reachedMinPosition = false;
         var newCol = player.x;
         var newRow = player.y;
@@ -727,6 +737,14 @@ function removeImg(imgID) {
 // Hearts become visible agaain; use imgID
 function resetImg(imgID) {
   document.getElementById(imgID).style.visibility = "visible";
+}
+
+function killPlayer()
+{
+    player.x=-999;
+    player.y=-999;
+
+    enemySpeed=0;
 }
 
     </script>
