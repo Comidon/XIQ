@@ -56,7 +56,11 @@
     var score = 0;
 
     var sparx1;
+    var sparx1Dir=0;
+    var sparx1Step=1;
+
     var sparx2;
+    var sparx2Dir=1;
 
     function preload ()
     {
@@ -116,7 +120,94 @@
 
     }
 
+function updateSparx()
+{   
 
+    // 0 right 1 down 2left 3 up
+    let newRow = sparx1.y;
+    let newCol = sparx1.x;
+
+    
+    if(sparx1Dir==0)//right
+    {
+        console.log("Right");
+        newCol++;
+        if(onBorder(newRow,newCol))
+        {
+            sparx1.x=newCol;
+
+        }else
+        {
+           if(onBorder(sparx1.y+1, sparx1.x))//check up
+           {
+            sparx1Dir=1;
+           }else if(onBorder(sparx1.y-1, sparx1.x))
+           {
+            sparx1Dir=3;
+           }
+        }
+
+    }else  if(sparx1Dir==1)//up
+    {
+        console.log("up");
+        newRow--;
+        if(onBorder(newRow,newCol))
+        {
+            sparx1.y=newRow;
+
+        }else
+        {
+            if(onBorder(sparx1.y, sparx1.x+1))//check RIGHT
+           {
+            sparx1Dir=0;
+           }else if(onBorder(sparx1.y, sparx1.x-1))
+           {
+            sparx1Dir=2;
+           }
+        }
+
+    }else  if(sparx1Dir==2)//left
+    {
+        console.log("left");
+        newCol--;
+        if(onBorder(newRow,newCol))
+        {
+            sparx1.x=newCol;
+
+        }else
+        {
+            if(onBorder(sparx1.y+1, sparx1.x))//check down
+           {
+            sparx1Dir=3;
+           }else if(onBorder(sparx1.y-1, sparx1.x))
+           {
+            sparx1Dir=1;
+           }
+        }
+
+    }else if(sparx1Dir==3)//down
+    {
+        console.log("Down");
+        newRow++;
+        if(onBorder(newRow,newCol))
+        {
+            sparx1.y=newRow;
+
+        }else
+        {
+            if(onBorder(sparx1.y, sparx1.x-1))//check left
+           {
+            sparx1Dir=2;
+           }else if(onBorder(sparx1.y, sparx1.x+1))
+           {
+            sparx1Dir=0;
+           }
+        }
+
+    }
+
+   
+}
 
 function updateEnemy()
 {
@@ -279,6 +370,7 @@ function update ()
 
     handleMove();
     updateEnemy();
+    updateSparx();
 
 
 }
@@ -433,7 +525,7 @@ function processCapture()//player has completed a square, process it
     console.log("Done Drawing!");  
     addAllTemporaryBorders();  
     recalcBorders();
-   printBorders();
+   //printBorders();
 }
 function recalcBorders()
 {
