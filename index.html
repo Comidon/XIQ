@@ -33,7 +33,7 @@
 
     var game = new Phaser.Game(config);
 
-    var xBorderShift=5;//how far in to shift the game board from the screen width
+    var xBorderShift=15;//how far in to shift the game board from the screen width
     var yBorderShift=50;
 
     var player;
@@ -59,6 +59,8 @@
     var _this;
     var graphics;
     var lineGraphics;
+    var shadowGraphics;
+    var shadowSprite;
     var drawColor = 0xFFFFFF;
     var score = 0;
     var heart1, heart2, heart3;
@@ -70,8 +72,10 @@
     var closingPointX;
     var closingPointY;
     var movingDir;
-    var scoreFactor;
+    var scoreFactor=0;
     var percentage = 0;
+
+    var bone;
 
     var sparx1;
     var sparx1Dir=0;
@@ -89,8 +93,10 @@
 
     var particleLayer=6;
     var playerLayer=5;  
+    var fossilLayer=2;
     var UILayer=10;
     var backLayer=1;
+    var shadowLayer=3;
     var frontLayer=4;
 
 
@@ -111,6 +117,7 @@
         this.load.image('heart', 'assets/heart.jpg');
         this.load.image('back','assets/back.png');
         this.load.image('front','assets/front.png');
+        this.load.image('bone','assets/bone.png');
     }
 
     function create ()
@@ -142,8 +149,22 @@
         heart2.setDepth(UILayer);
         heart3.setDepth(UILayer);
 
-       
+        bone = this.add.sprite(xBorderShift + Math.random()*config.width -xBorderShift, yBorderShift + Math.random()*config.height-yBorderShift, 'bone');
+        bone.setDepth(fossilLayer);
+        var hintParticles = this.add.particles('yellow');
+        var hintEmitter = hintParticles.createEmitter({
+            speed: 100,
+            scale: { start: .03, end: .02 },
+            blendMode: 'ADD'
+        });
+        hintParticles.setDepth(particleLayer);
+        hintEmitter.startFollow(bone);
 
+
+
+
+        scoreText = this.add.text(10, 5, '00', { font: '40px monospace', fill: '#ffffff' });
+        scoreText.setDepth(UILayer);
         //this.add.rectangle(0, 0, 100, 100, whiteColor.color);
         enemyWidth = enemy.width;
         graphics = this.add.graphics({ fillStyle: { color: 0x0000aa } });
@@ -152,8 +173,7 @@
 
 
         //  The score
-        scoreText = this.add.text(10, 5, '00', { font: '40px monospace', fill: '#ffffff' });
-        scoreText.setDepth(UILayer);
+
         //scoreText.sendToFront();   
 
         let scale=3;
@@ -230,6 +250,12 @@
         fuseEmitter.startFollow(fuse);
 
         drawBorders();
+        
+
+        // shadowGraphics = graphics.generateTexture("shadow");
+        // shadowSprite = this.add.sprite(0,0,"shadow");
+        // shadowSprite.setDepth(shadowLayer);
+        // shadowSprite.mask = new Phaser.Display.Masks.BitmapMask(this, graphics);
         floodFill(enemy.x,enemy.y);
 
     }
@@ -1114,15 +1140,16 @@ function floodFill(x, y)
     }
   }
 
-  score = Math.round(score + scoreFactor * tempScore / 100);
+  score = Math.round(score + scoreFactor * tempScore / 100);  
+  
   scoreText.setText(score);
   percentage = percentage + tempScore;
 
-  console.log(percentage);
+ // console.log(percentage);
 
-  console.log(percentage / (config.width * config.height));
+  //console.log(percentage / (config.width * config.height));
 
-  console.log(config.width * config.height);
+  //console.log(config.width * config.height);
 
   // TEMPORARY: win text
   if (percentage / (config.width * config.height) > 0.75)
@@ -1281,7 +1308,28 @@ function floodFill(x, y)
   //console.log(corners.length);
  // graphics.fillStyle(0xFFFFFF, 1.0);
 
+  // let thick = graphics.thickness;
+  // let alpha = graphics.alpha;
+  // let color = graphics.color;
+
+ // graphics.lineStyle(50,0xFFFFFF,.8);
   graphics.fillPoints(corners, true);
+
+   //graphics.lineStyle(50,0xFFFFFF,.4);
+   //graphics.strokePoints(corners,true);
+   //graphics.lineStyle(thick,color,alpha);
+  
+
+  //shadowGraphics = graphics.generateTexture("shadow");
+  //shadowSprite.setTexture("shadow");
+  
+
+ // let scale =3.1;
+  //shadowSprite.setDisplaySize(shadowSprite.width*scale,shadowSprite.height*scale);
+  //shadowSprite.tint = 0x000000;
+ //shadowSprite.alpha = 0.6;
+
+  
 }
     </script>
 </body>
