@@ -47,7 +47,7 @@
     var input;
     var slowSpeed = 2;
     var fastSpeed = 2 * slowSpeed;
-    var board = [];
+    var board = []; // pixel values: 1 == is
     var border = [];
     var borderBackup = [];
     var drawMode = 0; //0: none 1:slow 2: fast
@@ -65,12 +65,20 @@
     var fuseMaxLength=100;//how many pixels between the fuse start and the player
     var fusePositions=[];
     var fuzeWaitCount=0;
+    var closingPointX;
+    var closingPointY;
+    var movingDir;
+    var scoreFactor;
+    var percentage = 0;
 
     var sparx1;
     var sparx1Dir=0;
 
     var sparx2;
     var sparx2Dir=0;
+
+    var scoreText;
+    var winText;
 
     // TO GO: in the pixel filler to update score according to conquered pixel spaces
     //
@@ -109,15 +117,17 @@
         fuse = this.add.sprite(-100, -100, 'sparx');
         fuse.alpha=0;
 
-        heart1 = this.add.sprite(320, 25, 'heart');
-        heart2 = this.add.sprite(345, 25, 'heart');
-        heart3 = this.add.sprite(370, 25, 'heart');
+        heart1 = this.add.sprite(425, 25, 'heart');
+        heart2 = this.add.sprite(450, 25, 'heart');
+        heart3 = this.add.sprite(475, 25, 'heart');
 
         //this.add.rectangle(0, 0, 100, 100, whiteColor.color);
         enemyWidth = enemy.width;
 
         //  The score
-        scoreText = this.add.text(420, 5, '00', { font: '40px monospace', fill: '#ffffff' });
+        scoreText = this.add.text(10, 5, '00', { font: '40px monospace', fill: '#ffffff' });
+
+
 
         initBoard();
 
@@ -524,7 +534,7 @@ function handleMove()
         {
             if(!isDrawing)
             {
-                if(withinScreen(newRow,newCol) && !isCaptured(newRow, newCol)) //Player is leaving a border
+                if(withinScreen(newRow,newCol) && !isCaptured(newRow, newCol) && !onBorder(newRow, newCol)) //Player is leaving a border
                 {
                     console.log("Starting Drawing");
                     borderBackup = border.slice(0); //Backup the current borders in case the player dies and this line will be removed
@@ -544,9 +554,28 @@ function handleMove()
             {
                 if(onBorder(newRow,newCol))//player reached a border
                 {
+                  closingPointX = player.x;
+                  closingPointY = player.y;
+                  if (newCol - player.x != 0)
+                  {
+                    movingDir = 0;
+                  }
+                  else
+                  {
+                    movingDir = 1;
+                  }
+
                     player.x = newCol;
                     player.y = newRow;
                     reachedMinPosition = true;
+                    if (drawMode == 1)
+                    {
+                      scoreFactor = 2;
+                    }
+                    else if (drawMode == 2)
+                    {
+                      scoreFactor = 1;
+                    }
                     drawMode = 0;
                     isDrawing = false;
                     processCapture();
@@ -640,6 +669,8 @@ function processCapture()//player has completed a square, process it
 {
     console.log("Done Drawing!");
     addAllTemporaryBorders();
+    let startPoint = checkWhichPointToFill();
+    floodFill(startPoint[0], startPoint[1]);
     recalcBorders();
    //printBorders();
 }
@@ -654,7 +685,10 @@ function recalcBorders()
     {
         for(row = 0;row < config.height; row++)
         {
-          border[get1DIndex(row,col)]=0;
+          if (border[get1DIndex(row,col)] != -1)
+          {
+            border[get1DIndex(row,col)]=0;
+          }
         }
     }
 
@@ -774,6 +808,93 @@ function borderFloodFill(data,row,col)
 
 }
 
+function checkWhichPointToFill()
+{
+  if (movingDir == 0)
+  {
+    if (checkCaptured(closingPointX, closingPointY + 1))
+    {
+      return [closingPointX, closingPointY + 1];
+    }
+    else
+    {
+      return [closingPointX, closingPointY - 1];
+    }
+  }
+  else if (movingDir == 1)
+  {
+    if (checkCaptured(closingPointX + 1, closingPointY))
+    {
+      return [closingPointX + 1, closingPointY];
+    }
+    else
+    {
+      return [closingPointX - 1, closingPointY];
+    }
+  }
+}
+
+function checkCaptured(x, y)
+{
+  if (onBorder(y, x))
+  {
+    return;
+  }
+
+  if (enemy.x == x && enemy.y == y)
+  {
+    return false;
+  }
+
+  var queue = [];
+  var set = [];
+
+  queue.push(x);
+  queue.push(y);
+
+  set[get1DIndex(y, x)] = 1;
+
+  while (queue.length > 0)
+  {
+    var tempX = queue.shift();
+    var tempY = queue.shift();
+
+    if (enemy.x == tempX && enemy.y == tempY)
+    {
+      return false;
+    }
+
+    if (!onBorder(tempY + 1, tempX) && set[get1DIndex(tempY + 1, tempX)] != 1)
+    {
+      set[get1DIndex(tempY + 1, tempX)] = 1;
+      queue.push(tempX);
+      queue.push(tempY + 1);
+    }
+
+    if (!onBorder(tempY - 1, tempX) && set[get1DIndex(tempY - 1, tempX)] != 1)
+    {
+      set[get1DIndex(tempY - 1, tempX)] = 1;
+      queue.push(tempX);
+      queue.push(tempY - 1);
+    }
+
+    if (!onBorder(tempY, tempX + 1) && set[get1DIndex(tempY, tempX + 1)] != 1)
+    {
+      set[get1DIndex(tempY, tempX + 1)] = 1;
+      queue.push(tempX + 1);
+      queue.push(tempY);
+    }
+
+    if (!onBorder(tempY, tempX - 1) && set[get1DIndex(tempY, tempX - 1)] != 1)
+    {
+      set[get1DIndex(tempY, tempX - 1)] = 1;
+      queue.push(tempX - 1);
+      queue.push(tempY);
+    }
+  }
+
+  return true;
+}
 
 function printBorders()
 {
@@ -845,6 +966,8 @@ function killPlayer()
 
 function floodFill(x, y)
 {
+  let tempScore = 0;
+
   if (onBorder(y, x))
   {
     return;
@@ -864,6 +987,8 @@ function floodFill(x, y)
   var startingX;
   var startingY;
 
+  tempScore++;
+
   while (queue.length > 0)
   {
     var tempX = queue.shift();
@@ -871,6 +996,7 @@ function floodFill(x, y)
 
     if (!onBorder(tempY + 1, tempX) && set[get1DIndex(tempY + 1, tempX)] != 1)
     {
+      tempScore++;
       //graphics.fillPoint(tempX, tempY + 1);
       set[get1DIndex(tempY + 1, tempX)] = 1;
       queue.push(tempX);
@@ -885,6 +1011,7 @@ function floodFill(x, y)
 
     if (!onBorder(tempY - 1, tempX) && set[get1DIndex(tempY - 1, tempX)] != 1)
     {
+      tempScore++;
       //graphics.fillPoint(tempX, tempY - 1);
       set[get1DIndex(tempY - 1, tempX)] = 1;
       queue.push(tempX);
@@ -899,6 +1026,7 @@ function floodFill(x, y)
 
     if (!onBorder(tempY, tempX + 1) && set[get1DIndex(tempY, tempX + 1)] != 1)
     {
+      tempScore++;
       //graphics.fillPoint(tempX + 1, tempY);
       set[get1DIndex(tempY, tempX + 1)] = 1;
       queue.push(tempX + 1);
@@ -913,6 +1041,7 @@ function floodFill(x, y)
 
     if (!onBorder(tempY, tempX - 1) && set[get1DIndex(tempY, tempX - 1)] != 1)
     {
+      tempScore++;
       //graphics.fillPoint(tempX - 1, tempY);
       set[get1DIndex(tempY, tempX - 1)] = 1;
       queue.push(tempX - 1);
@@ -926,37 +1055,53 @@ function floodFill(x, y)
     }
   }
 
+  score = Math.round(score + scoreFactor * tempScore / 100);
+  scoreText.setText(score);
+  percentage = percentage + tempScore;
+
+  console.log(percentage);
+
+  console.log(percentage / (config.width * config.height));
+
+  console.log(config.width * config.height);
+
+  // TEMPORARY: win text
+  if (percentage / (config.width * config.height) > 0.75)
+  {
+    _this.add.text(175, 230, 'You Win!', { font: '40px monospace', fill: '#ffffff' });
+  }
+
   var checkingDir;
   var runningX;
   var runningY;
 
-  console.log(startingX);
-  console.log(startingY);
+  //console.log(startingX);
+  //console.log(startingY);
 
   if (shapeBorderSet[get1DIndex(startingY, startingX + 1)] == 1)
   {
-    console.log("right");
+    //console.log("right");
     checkingDir = 0;
     runningX = startingX + 1;
     runningY = startingY;
   }
   else if (shapeBorderSet[get1DIndex(startingY, startingX - 1)] == 1)
   {
-    console.log("left");
+    //console.log("left");
     checkingDir = 1;
     runningX = startingX - 1;
     runningY = startingY;
   }
   else if (shapeBorderSet[get1DIndex(startingY + 1, startingX)] == 1)
   {
-    console.log("up");
+    //console.log("up");
     checkingDir = 2;
     runningX = startingX;
     runningY = startingY + 1;
   }
   else if (shapeBorderSet[get1DIndex(startingY - 1, startingX)] == 1)
   {
-    console.log("down");
+    //console.log("down");
     checkingDir = 3;
     runningX = startingX;
     runningY = startingY - 1;
@@ -975,13 +1120,13 @@ function floodFill(x, y)
         corners.push(new Phaser.Geom.Point(runningX, runningY));
         if (shapeBorderSet[get1DIndex(runningY + 1, runningX)] == 1)
         {
-          console.log("up");
+          //console.log("up");
           runningY++;
           checkingDir = 2;
         }
         else if (shapeBorderSet[get1DIndex(runningY - 1, runningX)] == 1)
         {
-          console.log("down");
+          //console.log("down");
           runningY--;
           checkingDir = 3;
         }
@@ -1001,13 +1146,13 @@ function floodFill(x, y)
         corners.push(new Phaser.Geom.Point(runningX, runningY));
         if (shapeBorderSet[get1DIndex(runningY + 1, runningX)] == 1)
         {
-          console.log("up");
+          //console.log("up");
           runningY++;
           checkingDir = 2;
         }
         else if (shapeBorderSet[get1DIndex(runningY - 1, runningX)] == 1)
         {
-          console.log("down");
+          //console.log("down");
           runningY--;
           checkingDir = 3;
         }
@@ -1027,13 +1172,13 @@ function floodFill(x, y)
         corners.push(new Phaser.Geom.Point(runningX, runningY));
         if (shapeBorderSet[get1DIndex(runningY, runningX + 1)] == 1)
         {
-          console.log("right");
+          //console.log("right");
           runningX++;
           checkingDir = 0;
         }
         else if (shapeBorderSet[get1DIndex(runningY, runningX - 1)] == 1)
         {
-          console.log("left");
+          //console.log("left");
           runningX--;
           checkingDir = 1;
         }
@@ -1053,13 +1198,13 @@ function floodFill(x, y)
         corners.push(new Phaser.Geom.Point(runningX, runningY));
         if (shapeBorderSet[get1DIndex(runningY, runningX + 1)] == 1)
         {
-          console.log("right");
+          //console.log("right");
           runningX++;
           checkingDir = 0;
         }
         else if (shapeBorderSet[get1DIndex(runningY, runningX - 1)] == 1)
         {
-          console.log("left");
+          //console.log("left");
           runningX--;
           checkingDir = 1;
         }
@@ -1074,7 +1219,7 @@ function floodFill(x, y)
     }
   }
 
-  console.log(corners.length);
+  //console.log(corners.length);
 
   graphics.fillPoints(corners, true);
 }
