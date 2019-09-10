@@ -34,7 +34,7 @@
     var game = new Phaser.Game(config);
 
     var xBorderShift=5;//how far in to shift the game board from the screen width
-    var yBorderShift=20;
+    var yBorderShift=50;
 
     var player;
     var enemy;
@@ -58,6 +58,7 @@
     var whiteColor;
     var _this;
     var graphics;
+    var lineGraphics;
     var drawColor = 0xFFFFFF;
     var score = 0;
     var heart1, heart2, heart3;
@@ -85,6 +86,15 @@
 
     var backTex;
     var frontTex;
+
+    var particleLayer=6;
+    var playerLayer=5;  
+    var UILayer=10;
+    var backLayer=1;
+    var frontLayer=4;
+
+
+
 
     // TO GO: in the pixel filler to update score according to conquered pixel spaces
     //
@@ -115,7 +125,7 @@
         player = this.add.sprite(xBorderShift, yBorderShift, 'player');
         enemy= this.add.sprite(config.width/2,config.height/2,'enemy');
         enemy.alpha=0;
-        player.alpha=0;
+        player.alpha=0;       
 
         sparx1 = this.add.sprite(xBorderShift, config.height-yBorderShift, 'sparx');
         sparx1.alpha=0;
@@ -128,30 +138,38 @@
         heart1 = this.add.sprite(425, 25, 'heart');
         heart2 = this.add.sprite(450, 25, 'heart');
         heart3 = this.add.sprite(475, 25, 'heart');
-        
+        heart1.setDepth(UILayer);
+        heart2.setDepth(UILayer);
+        heart3.setDepth(UILayer);
+
+       
+
+        //this.add.rectangle(0, 0, 100, 100, whiteColor.color);
+        enemyWidth = enemy.width;
+        graphics = this.add.graphics({ fillStyle: { color: 0x0000aa } });
+        lineGraphics = this.add.graphics({ fillStyle: { color: 0x0000aa } });
+        lineGraphics.setDepth(playerLayer);
+
+
+        //  The score
+        scoreText = this.add.text(10, 5, '00', { font: '40px monospace', fill: '#ffffff' });
+        scoreText.setDepth(UILayer);
+        //scoreText.sendToFront();   
 
         let scale=3;
         backTex = this.add.sprite(0, 0, 'back');
     
         backTex.setDisplaySize(backTex.width*scale,backTex.height*scale);
-        backTex.z=10;
-
-
-        //this.add.rectangle(0, 0, 100, 100, whiteColor.color);
-        enemyWidth = enemy.width;
-        graphics = this.add.graphics({ fillStyle: { color: 0x0000aa } });
-        //  The score
-        scoreText = this.add.text(10, 5, '00', { font: '40px monospace', fill: '#ffffff' });
-        scoreText.z=0;
+        backTex.setDepth(backLayer);        
 
         
         frontTex = this.add.sprite(0, 0, 'front');
     
         frontTex.setDisplaySize(frontTex.width*scale,frontTex.height*scale);
         frontTex.mask = new Phaser.Display.Masks.BitmapMask(this, graphics);
-        frontTex.z=10;
+        frontTex.setDepth(frontLayer);
 
-      
+
         
         //graphics.fillRectShape(new Rectangle(xBorderShift,yBorderShift,config.width-xBorderShift,config.height -yBorderShift));
 
@@ -163,6 +181,7 @@
             scale: { start: .2, end: .02 },
             blendMode: 'ADD'
         });
+        particles.setDepth(particleLayer);
 
 
         var particles2 = this.add.particles('red');
@@ -172,6 +191,7 @@
             scale: { start: .5, end: .01 },
             blendMode: 'ADD'
         });
+        particles2.setDepth(particleLayer);
 
           var sparx1Part = this.add.particles('yellow');
 
@@ -180,6 +200,7 @@
             scale: { start: .08, end: .04 },
             blendMode: 'ADD'
         });
+        sparx1Part.setDepth(particleLayer);
 
         var sparx2Part = this.add.particles('yellow');
 
@@ -188,6 +209,7 @@
             scale: { start: .08, end: .04 },
             blendMode: 'ADD'
         });
+        sparx2Part.setDepth(particleLayer);
 
          var fusePart = this.add.particles('yellow');
 
@@ -196,6 +218,8 @@
             scale: { start: .08, end: .04 },
             blendMode: 'ADD'
         });
+
+        fusePart.setDepth(particleLayer);
 
         emitter.startFollow(player);
         emitter2.startFollow(enemy);
@@ -491,7 +515,7 @@ function drawBorders()
             var point = border[get1DIndex(row, col)];
             if(point == 1  || point == 2 )
             {
-                fillPixel(0xFFFFFF, col, row);
+                fillPixel(0xFFFFFF, col, row,lineGraphics);
             }
 
         }
@@ -666,7 +690,7 @@ function isTemporary(row, col)
 function addPlayerPositionToBorder() //Adds the current player position onto the border as a temporary point
 {
     border[get1DIndex(player.y, player.x)] = 2;
-    fillPixel(player.x, player.y, drawColor);
+    fillPixel(player.x, player.y, drawColor,lineGraphics);
 
     if(fusePositions.length/2>=fuseMaxLength)
     {
@@ -691,6 +715,7 @@ function addAllTemporaryBorders()
             }
         }
     }
+    lineGraphics.clear();
 }
 
 function processCapture()//player has completed a square, process it
@@ -973,11 +998,12 @@ function onBorder(row, col)
     return false;
 }
 
-function fillPixel(x, y, color)
+function fillPixel(x, y, color, graphicsObj)
 {
   var rect = new Phaser.Geom.Rectangle(x, y, 1, 1);
-  graphics.fillStyle(color, 1.0);
-  graphics.fillRectShape(rect);
+  //rect.setDepth(UILayer);
+  graphicsObj.fillStyle(color, 1.0);
+  graphicsObj.fillRectShape(rect);
 }
 
 // Hides heart when life is lost; use imgID
