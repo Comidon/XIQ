@@ -8,13 +8,14 @@
 .imgbox {
 }
 </style>
-<body>
+<div>
+    <body bgcolor="#afafaf">
     <script type="text/javascript">
 
     var config = {
         type: Phaser.AUTO,
-        width: 500,
-        height: 510,
+        width: 700,
+        height: 700,
         physics: {
             default: 'arcade',
             arcade: {
@@ -38,7 +39,7 @@
     var player;
     var enemy;
     var enemyWidth;
-    var enemySpeed=4;
+    var enemySpeed=5;
     var enemyDirectionX=1;
     var enemyDirectionY=1;
     var cursors;
@@ -1225,4 +1226,12 @@ function floodFill(x, y)
 }
     </script>
 </body>
+</div>
+
+<div>
+<p>Welcome to Qix! Ccontrol the green character with the arrow keys. </p>
+<p>Press space to activate drawing mode and try to capture 75% of the board in your squares.</p>
+<p>Press space twice for fast drawing mode. Safer but awards fewer points.</p>
+<p>Don't stop while drawing and watch out for enemies on the board. </p>
+</div>
 </html>
