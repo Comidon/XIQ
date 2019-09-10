@@ -34,12 +34,12 @@
     var game = new Phaser.Game(config);
 
     var xBorderShift=5;//how far in to shift the game board from the screen width
-    var yBorderShift=5;
+    var yBorderShift=20;
 
     var player;
     var enemy;
     var enemyWidth;
-    var enemySpeed=5;
+    var enemySpeed=0;
     var enemyDirectionX=1;
     var enemyDirectionY=1;
     var cursors;
@@ -81,6 +81,11 @@
     var scoreText;
     var winText;
 
+
+
+    var backTex;
+    var frontTex;
+
     // TO GO: in the pixel filler to update score according to conquered pixel spaces
     //
     //scoreText.setText(score += pixelNum);
@@ -94,12 +99,14 @@
         this.load.image('enemy','assets/enemy.png');
         this.load.image('sparx','assets/sparx.png')
         this.load.image('heart', 'assets/heart.jpg');
+        this.load.image('back','assets/back.png');
+        this.load.image('front','assets/front.png');
     }
 
     function create ()
     {
       _this = this;
-      graphics = this.add.graphics({ fillStyle: { color: 0x0000aa } });
+     
       whiteColor = new Phaser.Display.Color(100, 0, 0);
         cursors = this.input.keyboard.createCursorKeys();
         spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
@@ -121,14 +128,32 @@
         heart1 = this.add.sprite(425, 25, 'heart');
         heart2 = this.add.sprite(450, 25, 'heart');
         heart3 = this.add.sprite(475, 25, 'heart');
+        
+
+        let scale=3;
+        backTex = this.add.sprite(0, 0, 'back');
+    
+        backTex.setDisplaySize(backTex.width*scale,backTex.height*scale);
+        backTex.z=10;
+
 
         //this.add.rectangle(0, 0, 100, 100, whiteColor.color);
         enemyWidth = enemy.width;
-
+        graphics = this.add.graphics({ fillStyle: { color: 0x0000aa } });
         //  The score
         scoreText = this.add.text(10, 5, '00', { font: '40px monospace', fill: '#ffffff' });
+        scoreText.z=0;
 
+        
+        frontTex = this.add.sprite(0, 0, 'front');
+    
+        frontTex.setDisplaySize(frontTex.width*scale,frontTex.height*scale);
+        frontTex.mask = new Phaser.Display.Masks.BitmapMask(this, graphics);
+        frontTex.z=10;
 
+      
+        
+        //graphics.fillRectShape(new Rectangle(xBorderShift,yBorderShift,config.width-xBorderShift,config.height -yBorderShift));
 
         initBoard();
 
@@ -181,6 +206,7 @@
         fuseEmitter.startFollow(fuse);
 
         drawBorders();
+        floodFill(enemy.x,enemy.y);
 
     }
 
@@ -204,6 +230,7 @@ function update ()
    sparx1Dir= updateSparx(sparx1, sparx1Dir);
    sparx2Dir= updateSparx(sparx2, sparx2Dir);
 }
+
 
 function updateSparx(sparx, sparxDir)
 {
@@ -668,6 +695,7 @@ function addAllTemporaryBorders()
 
 function processCapture()//player has completed a square, process it
 {
+    graphics.clear();
     console.log("Done Drawing!");
     addAllTemporaryBorders();
     let startPoint = checkWhichPointToFill();
@@ -811,6 +839,10 @@ function borderFloodFill(data,row,col)
 
 function checkWhichPointToFill()
 {
+
+//TESTING
+return [enemy.x,enemy.y];
+
   if (movingDir == 0)
   {
     if (checkCaptured(closingPointX, closingPointY + 1))
@@ -974,7 +1006,7 @@ function floodFill(x, y)
     return;
   }
 
-  graphics.fillPoint(x, y);
+  graphics.fillPoint(x, y);//Is this needed?
 
   var queue = [];
   var set = [];
@@ -1069,7 +1101,7 @@ function floodFill(x, y)
   // TEMPORARY: win text
   if (percentage / (config.width * config.height) > 0.75)
   {
-    _this.add.text(175, 230, 'You Win!', { font: '40px monospace', fill: '#ffffff' });
+   // _this.add.text(175, 230, 'You Win!', { font: '40px monospace', fill: '#ffffff' });
   }
 
   var checkingDir;
@@ -1221,6 +1253,7 @@ function floodFill(x, y)
   }
 
   //console.log(corners.length);
+ // graphics.fillStyle(0xFFFFFF, 1.0);
 
   graphics.fillPoints(corners, true);
 }
