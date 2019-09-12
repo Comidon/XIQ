@@ -102,6 +102,10 @@
     var shadowWidth=10;
     var count = 0;
 
+    var bonusScore = 1000000000;
+
+    var boneUncovered = { bool : false };
+
 
 
     // TO GO: in the pixel filler to update score according to conquered pixel spaces
@@ -780,6 +784,22 @@ function recalcBorders()
         border[get1DIndex(newY,newX)]=1;
     }
 
+
+
+}
+
+function resetEnemyArea()
+{
+    for(col = 0; col < config.width; col++)
+    {
+        for(row = 0;row < config.height; row++)
+        {
+          if (border[get1DIndex(row,col)] != 1)
+          {
+            border[get1DIndex(row,col)]=0;
+          }
+        }
+    }
 }
 
 function borderFloodFill(data,row,col)
@@ -812,7 +832,7 @@ function borderFloodFill(data,row,col)
             newBorders.push(nx);
             newBorders.push(north);
 
-        }else if (data[get1DIndex(north,nx)]==0)//otherwise keep floodfilling
+        }else if (data[get1DIndex(north,nx)]==-1)//otherwise keep floodfilling
         {
             data[get1DIndex(north,nx)]=replaceVal;
             Qx.push(nx);
@@ -823,7 +843,7 @@ function borderFloodFill(data,row,col)
         {
             newBorders.push(nx);
             newBorders.push(south);
-        }else if(data[get1DIndex(south,nx)]==0)
+        }else if(data[get1DIndex(south,nx)]==-1)
         {
             data[get1DIndex(south,nx)]=replaceVal;
             Qx.push(nx);
@@ -835,7 +855,7 @@ function borderFloodFill(data,row,col)
             newBorders.push(east);
             newBorders.push(ny);
 
-        }else if(data[get1DIndex(ny,east)]==0)
+        }else if(data[get1DIndex(ny,east)]==-1)
         {
             data[get1DIndex(ny,east)]=replaceVal;
             Qx.push(east);
@@ -846,7 +866,7 @@ function borderFloodFill(data,row,col)
         {
             newBorders.push(west);
             newBorders.push(ny);
-        }else  if(data[get1DIndex(ny,west)]==0)
+        }else if(data[get1DIndex(ny,west)]==-1)
         {
             data[get1DIndex(ny,west)]=replaceVal;
             Qx.push(west);
@@ -1048,13 +1068,33 @@ function killPlayer()
 
 }
 
-function checkUncover(bSprite)
+function checkUncover(bSprite, bUncovered)
 {
-  bSprite.get
+  if (bUncovered.bool)
+  {
+    return;
+  }
+
+  let rec = bSprite.getBounds();
+  let recLeft = Math.round(rec.left);
+  let recRight = Math.round(rec.right);
+  let recTop = Math.round(rec.top);
+  let recBottom = Math.round(rec.bottom);
+  console.log(border[get1DIndex(recTop, recLeft)]);
+  console.log(border[get1DIndex(recTop, recRight)]);
+  console.log(border[get1DIndex(recBottom, recLeft)]);
+  console.log(border[get1DIndex(recBottom, recRight)]);
+
+  if ((border[get1DIndex(recTop, recLeft)] != -1) && (border[get1DIndex(recTop, recRight)] != -1) && (border[get1DIndex(recBottom, recLeft)] != -1) && (border[get1DIndex(recBottom, recRight)] != -1))
+  {
+    score += bonusScore;
+    bUncovered.bool = true;
+  }
 }
 
 function floodFill(x, y)
 {
+  resetEnemyArea();
   let tempScore = 0;
 
   if (onBorder(y, x))
@@ -1071,6 +1111,7 @@ function floodFill(x, y)
   queue.push(y);
 
   set[get1DIndex(y, x)] = 1;
+  border[get1DIndex(y, x)] = -1;
 
   var shapeBorderSet = [];
   var startingX = x;
@@ -1090,6 +1131,7 @@ function floodFill(x, y)
       set[get1DIndex(tempY + 1, tempX)] = 1;
       queue.push(tempX);
       queue.push(tempY + 1);
+      border[get1DIndex(tempY + 1, tempX)] = -1;
     }
     else if (onBorder(tempY + 1, tempX))
     {
@@ -1108,6 +1150,7 @@ function floodFill(x, y)
       set[get1DIndex(tempY - 1, tempX)] = 1;
       queue.push(tempX);
       queue.push(tempY - 1);
+      border[get1DIndex(tempY - 1, tempX)] = -1;
     }
     else if (onBorder(tempY - 1, tempX))
     {
@@ -1126,6 +1169,7 @@ function floodFill(x, y)
       set[get1DIndex(tempY, tempX + 1)] = 1;
       queue.push(tempX + 1);
       queue.push(tempY);
+      border[get1DIndex(tempY, tempX + 1)] = -1;
     }
     else if (onBorder(tempY, tempX + 1))
     {
@@ -1144,6 +1188,7 @@ function floodFill(x, y)
       set[get1DIndex(tempY, tempX - 1)] = 1;
       queue.push(tempX - 1);
       queue.push(tempY);
+      border[get1DIndex(tempY, tempX - 1)] = -1;
     }
     else if (onBorder(tempY, tempX - 1))
     {
@@ -1157,6 +1202,10 @@ function floodFill(x, y)
   }
 
   score = Math.round(score + scoreFactor * tempScore / 100);
+
+  // TODO: Check every bone
+  // TEMP: Check a single bone
+  checkUncover(bone, boneUncovered);
 
   scoreText.setText(score);
   percentage = percentage + tempScore;
