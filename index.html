@@ -39,7 +39,7 @@
     var player;
     var enemy;
     var enemyWidth;
-    var enemySpeed=3;
+    var enemySpeed=2;
     var enemyDirectionX=1;
     var enemyDirectionY=1;
     var cursors;
@@ -47,7 +47,7 @@
     var enterButton;
     var gameOver = false;
     var input;
-    var slowSpeed = 5;
+    var slowSpeed = 2;
     var fastSpeed = 2 * slowSpeed;
     var board = []; // pixel values: 1 == is
     var border = [];
@@ -78,7 +78,7 @@
 
     var bones=[];
     var bombs=[];
-    var numberOfBones=3;
+    var numberOfBones=5;
     var numberOfBombs=2;
 
    var sparxs=[];
@@ -92,7 +92,7 @@
     var frontTex;
 
     var particleLayer=6;
-    var playerLayer=5;
+    var playerLayer=7;
     var fossilLayer=2;
     var UILayer=10;
     var backLayer=1;
@@ -121,7 +121,9 @@
         this.load.image('heart', 'assets/heart.jpg');
         this.load.image('back','assets/back.png');
         this.load.image('front','assets/front.png');
-        this.load.image('bone','assets/bone.png');
+        this.load.image('bone1','assets/bone1.png');
+        this.load.image('bone2','assets/bone2.png');
+        this.load.image('bone3','assets/bone3.png');
         this.load.image('title', 'assets/Title.png'); //temp title
         this.load.image('bomb','assets/bomb.png');
     }
@@ -162,7 +164,8 @@
 
         player = this.add.sprite(xBorderShift, yBorderShift, 'player');
         enemy= this.add.sprite(config.width/2,config.height/2,'enemy');
-        enemy.alpha=0;
+        enemy.setDepth(playerLayer);
+        //enemy.alpha=0;
         player.alpha=0;
 
         fuse = this.add.sprite(-100, -100, 'sparx');
@@ -319,9 +322,6 @@ function updateEnemy()
     {
         var newCol= enemy.x+enemyDirectionX;
         var newRow = enemy.y+enemyDirectionY;
-
-//onBorder(newRow,newCol)
-//rectOnBorder(enemy.y-enemyWidth/2,enemy.x-enemyWidth/2,enemyWidth)
         if(onBorder(newRow,newCol))
         {
             if((Math.random()*100)<=50)
@@ -353,6 +353,34 @@ function updateEnemy()
             enemyDirectionY=-enemyDirectionY;
         }
     }
+    if(enemyDirectionX>0)
+    {
+      if(enemyDirectionY>0)
+      {
+        enemy.rotation=135*(Math.PI/180);
+
+      }else
+      {
+        enemy.rotation=45*(Math.PI/180);
+      }
+
+    }else
+    {
+      if(enemyDirectionY>0)
+      {
+        enemy.rotation=225*(Math.PI/180);
+      }else
+      {
+        enemy.rotation=315*(Math.PI/180);
+        
+      }
+
+    }
+
+
+
+
+
 }
 
 //THIS IS TOTALLY BROKEN
@@ -1377,6 +1405,18 @@ class fossil extends Phaser.Physics.Arcade.Sprite {
 
 
   constructor(scene, x = 0, y = 0, texture = 'bone') {
+    var chance = Math.random()*100;
+    if(chance<=33)
+    {
+      texture="bone1";
+    }else if(chance<=66)
+    {
+      texture = "bone2";
+    }else{
+      texture = "bone3";
+    }
+
+
     super(scene, x, y, texture)
     this.setDepth(fossilLayer);
     scene.add.existing(this)  ;
@@ -1428,25 +1468,40 @@ class sparx extends Phaser.Physics.Arcade.Sprite {
         sparxPart.setDepth(particleLayer);
         sparxEmitter.startFollow(this);
 
+
         this.sparxDir=0;
+        this.count =0;
+        this.speedSkip=1;
 
-        this.lastX=x;
-        this.lastY=y;
-
+        this.upAngle=0;
+        this.rightAngle=this.rotation=90*(Math.PI/180);
+        this.downAngle=this.rotation=180*(Math.PI/180);
+        this.leftAngle=this.rotation=270*(Math.PI/180);
 
   }
 
   update() {
+    
+
+this.count+=1;
+if(this.count<=this.speedSkip)
+{  
+  console.log("skip");
+  return;
+}
+this.count=0;
+
     let newRow = this.y;
     let newCol = this.x;
 
     if(this.sparxDir==0)//right
     {
+      this.rotation=this.rightAngle;
         newCol++;
         if(onBorder(newRow,newCol))
         {
           this.x=newCol;
-            this.sparx1Dir;
+          this.sparx1Dir;
 
         }else
         {
@@ -1461,6 +1516,7 @@ class sparx extends Phaser.Physics.Arcade.Sprite {
 
     }else  if(this.sparxDir==1)//up
     {
+      this.rotation=this.upAngle;
         newRow--;
         if(onBorder(newRow,newCol))
         {
@@ -1479,6 +1535,7 @@ class sparx extends Phaser.Physics.Arcade.Sprite {
 
     }else if(this.sparxDir==2)//left
     {
+      this.rotation=this.leftAngle;
         newCol--;
         if(onBorder(newRow,newCol))
         {
@@ -1497,6 +1554,7 @@ class sparx extends Phaser.Physics.Arcade.Sprite {
 
     }else if(this.sparxDir==3)//down
     {
+      this.rotation=this.downAngle;
         newRow++;
         if(onBorder(newRow,newCol))
         {
@@ -1514,11 +1572,7 @@ class sparx extends Phaser.Physics.Arcade.Sprite {
         }
 
     }
-
-    if(this.lastX==this.x && this.lastY==this.y)
-    {
-
-    }
+    
 
   }
 
