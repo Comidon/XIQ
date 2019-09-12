@@ -81,6 +81,8 @@
     var scoreText;
     var winText;
 
+    var count = 0;
+
     // TO GO: in the pixel filler to update score according to conquered pixel spaces
     //
     //scoreText.setText(score += pixelNum);
@@ -93,13 +95,15 @@
         this.load.image('yellow', 'assets/yellow.png');
         this.load.image('enemy','assets/enemy.png');
         this.load.image('sparx','assets/sparx.png')
-        this.load.image('heart', 'assets/heart.jpg');
+        this.load.image('heart1', 'assets/heart.jpg');
+        this.load.image('heart2', 'assets/heart.jpg');
+        this.load.image('heart3', 'assets/heart.jpg');
     }
 
     function create ()
     {
       _this = this;
-      graphics = this.add.graphics({ fillStyle: { color: 0x0000aa } });
+
       whiteColor = new Phaser.Display.Color(100, 0, 0);
         cursors = this.input.keyboard.createCursorKeys();
         spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
@@ -118,9 +122,13 @@
         fuse = this.add.sprite(-100, -100, 'sparx');
         fuse.alpha=0;
 
-        heart1 = this.add.sprite(425, 25, 'heart');
-        heart2 = this.add.sprite(450, 25, 'heart');
-        heart3 = this.add.sprite(475, 25, 'heart');
+        heart1 = this.add.sprite(425, 25, 'heart1');
+      //  heart1.id = "heart1";
+      //  document.body.appendChild(heart1);
+
+        heart2 = this.add.sprite(450, 25, 'heart2');
+        heart3 = this.add.sprite(475, 25, 'heart3');
+        graphics = this.add.graphics({ fillStyle: { color: 0x0000aa } });
 
         //this.add.rectangle(0, 0, 100, 100, whiteColor.color);
         enemyWidth = enemy.width;
@@ -189,7 +197,15 @@ function update ()
 {
     if (gameOver)
     {
+      if (count == 0){
+        count++;
+      }
+      else if (count == 1) {
+        count++;
+      } else if (count == 2) {
         return;
+      }
+
     }
 
     if(Phaser.Input.Keyboard.JustDown(spacebar) && !isDrawing)
@@ -204,6 +220,7 @@ function update ()
    sparx1Dir= updateSparx(sparx1, sparx1Dir);
    sparx2Dir= updateSparx(sparx2, sparx2Dir);
 }
+
 
 function updateSparx(sparx, sparxDir)
 {
@@ -248,7 +265,7 @@ function updateSparx(sparx, sparxDir)
            }
         }
 
-    }else  if(sparxDir==2)//left
+    }else if(sparxDir==2)//left
     {
         newCol--;
         if(onBorder(newRow,newCol))
@@ -329,10 +346,6 @@ function updateEnemy()
             enemyDirectionY=-enemyDirectionY;
         }
     }
-
-
-
-
 }
 
 //THIS IS TOTALLY BROKEN
@@ -433,10 +446,6 @@ function initBoard()
     {
         border[get1DIndex(config.height-yBorderShift, i)] = 1;
     }
-
-
-
-
 }
 
 
@@ -799,14 +808,8 @@ function borderFloodFill(data,row,col)
             newBorders.push(west);
             newBorders.push(south);
         }
-
-
-
-
-
     }
     return newBorders;
-
 }
 
 function checkWhichPointToFill()
@@ -959,10 +962,23 @@ function resetImg(imgID) {
 
 function killPlayer()
 {
-    player.x=-999;
-    player.y=-999;
+    if (count == 0) {
+      removeImg(); // heart1 ID
+      player.x = player.x;
+      player.y = player.y;
+      count++; // lives used
+    } else if (count == 1) {
+      removeImg(); // heart2 ID
+      player.x = player.x;
+      player.y = player.y;
+      count++;
+    } else if (count == 2) {
+      removeImg(); // heart3 ID
+      player.x=-999;
+      player.y=-999;
+      enemySpeed=0;
+    }
 
-    enemySpeed=0;
 }
 
 function floodFill(x, y)
