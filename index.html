@@ -104,6 +104,9 @@
 
     var bonusScore = 1000000000;
 
+    var collectingScore = 0;
+    var remainingPixels = config.width * config.height;
+
     var boneUncovered = { bool : false };
 
 
@@ -1087,7 +1090,7 @@ function checkUncover(bSprite, bUncovered)
 
   if ((border[get1DIndex(recTop, recLeft)] != -1) && (border[get1DIndex(recTop, recRight)] != -1) && (border[get1DIndex(recBottom, recLeft)] != -1) && (border[get1DIndex(recBottom, recRight)] != -1))
   {
-    score += bonusScore;
+    collectingScore += bonusScore;
     bUncovered.bool = true;
   }
 }
@@ -1201,11 +1204,13 @@ function floodFill(x, y)
     }
   }
 
-  score = Math.round(score + scoreFactor * tempScore / 100);
+  checkUncover(bone, boneUncovered);
+
+  score = Math.round(collectingScore + scoreFactor * (remainingPixels - tempScore) / 100);
+  remainingPixels = tempScore;
 
   // TODO: Check every bone
   // TEMP: Check a single bone
-  checkUncover(bone, boneUncovered);
 
   scoreText.setText(score);
   percentage = percentage + tempScore;
