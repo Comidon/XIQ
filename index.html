@@ -486,7 +486,7 @@ function initBoard()
 
 function checkPlayerCollision()
 {
-  console.log(sparxs.length);
+ // console.log(sparxs.length);
   sparxs.forEach(element => {
     if(element.x==player.x && element.y==player.y)
     {
@@ -1488,7 +1488,7 @@ class sparx extends Phaser.Physics.Arcade.Sprite {
 this.count+=1;
 if(this.count<=this.speedSkip)
 {  
-  console.log("skip");
+  //console.log("skip");
   return;
 }
 this.count=0;
@@ -1620,12 +1620,5 @@ class bomb extends Phaser.Physics.Arcade.Sprite {
 
     </script>
 </body>
-</div>
-
-<div>
-<p>Welcome to Qix! Control the green character with the arrow keys. </p>
-<p>Press space to activate drawing mode and try to capture 75% of the board in your squares.</p>
-<p>Press space twice for fast drawing mode. Safer but awards fewer points.</p>
-<p>Don't stop while drawing and watch out for enemies on the board. </p>
 </div>
 </html>
