@@ -44,6 +44,7 @@
     var enemyDirectionY=1;
     var cursors;
     var spacebar;
+    var enterButton;
     var gameOver = false;
     var input;
     var slowSpeed = 2;
@@ -86,8 +87,6 @@
     var scoreText;
     var winText;
 
-
-
     var backTex;
     var frontTex;
 
@@ -101,8 +100,8 @@
 
     var shadowWidth=10;
     var count = 0;
-
-
+    var title; //temp title
+    var justStarted = true;
 
     // TO GO: in the pixel filler to update score according to conquered pixel spaces
     //
@@ -120,16 +119,18 @@
         this.load.image('back','assets/back.png');
         this.load.image('front','assets/front.png');
         this.load.image('bone','assets/bone.png');
+        this.load.image('title', 'assets/Title.png'); //temp title
     }
 
     function create ()
     {
-      _this = this;
-
-      whiteColor = new Phaser.Display.Color(100, 0, 0);
+        _this = this;
         cursors = this.input.keyboard.createCursorKeys();
         spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        enterButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
         keys = this.input.keyboard
+
+        whiteColor = new Phaser.Display.Color(100, 0, 0);
 
         player = this.add.sprite(xBorderShift, yBorderShift, 'player');
         enemy= this.add.sprite(config.width/2,config.height/2,'enemy');
@@ -172,9 +173,10 @@
 
         shadowGraphics = this.add.graphics({ fillStyle: { color: 0x000000, alpha: 0.3 } });
         shadowGraphics.setDepth(shadowLayer);
+        title = this.add.sprite(330, 390, 'title');
+        title.setDepth(UILayer);
 
         //  The score
-
         //scoreText.sendToFront();
 
         let scale=3;
@@ -189,8 +191,6 @@
         frontTex.mask = new Phaser.Display.Masks.BitmapMask(this, graphics);
         frontTex.setDepth(frontLayer);
 
-
-
         //graphics.fillRectShape(new Rectangle(xBorderShift,yBorderShift,config.width-xBorderShift,config.height -yBorderShift));
 
         initBoard();
@@ -202,7 +202,6 @@
             blendMode: 'ADD'
         });
         particles.setDepth(particleLayer);
-
 
         var particles2 = this.add.particles('red');
 
@@ -257,12 +256,24 @@
         // shadowSprite.setDepth(shadowLayer);
         // shadowSprite.mask = new Phaser.Display.Masks.BitmapMask(this, graphics);
         floodFill(enemy.x,enemy.y);
+    //  if (justStarted == true) {
+
+    //  }
 
     }
 
-
 function update ()
 {
+    if (Phaser.Input.Keyboard.JustDown(enterButton) && justStarted == true) {
+        justStarted = false;
+        title.visible = false;
+        console.log("Entered");
+    }
+    if (count == 3) {
+      location.reload(true);
+      count = 0;
+    }
+
     if (gameOver)
     {
       if (count == 0){
@@ -271,9 +282,8 @@ function update ()
       else if (count == 1) {
         count++;
       } else if (count == 2) {
-        return;
-      }
 
+      }
     }
 
     if(Phaser.Input.Keyboard.JustDown(spacebar) && !isDrawing)
@@ -550,7 +560,6 @@ function drawBorders()
 
 function handleMove()
 {
-
     let speed = 0;
     if(drawMode == 0)
     {
@@ -1040,12 +1049,12 @@ function killPlayer()
       player.y = player.y;
       count++;
     } else if (count == 2) {
+      count++;
       heart3.visible = false;
       player.x=-999;
       player.y=-999;
       enemySpeed=0;
     }
-
 }
 
 function floodFill(x, y)
@@ -1193,7 +1202,6 @@ function floodFill(x, y)
   }*/
 
   var corners = [];
-
   var shadowCorners = [];
 
   //corners.push(new Phaser.Geom.Point(startingX, startingY));
