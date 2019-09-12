@@ -44,9 +44,10 @@
     var enemyDirectionY=1;
     var cursors;
     var spacebar;
+    var enterButton;
     var gameOver = false;
     var input;
-    var slowSpeed = 2;
+    var slowSpeed = 5;
     var fastSpeed = 2 * slowSpeed;
     var board = []; // pixel values: 1 == is
     var border = [];
@@ -78,16 +79,12 @@
     var bones=[];
     var numberOfBones=3;
 
-    var sparx1;
-    var sparx1Dir=0;
+   var sparxs=[];
+   var numberOfSparx=4;
 
-    var sparx2;
-    var sparx2Dir=0;
 
     var scoreText;
     var winText;
-
-
 
     var backTex;
     var frontTex;
@@ -102,9 +99,9 @@
 
     var shadowWidth=10;
     var count = 0;
-
+    var title; //temp title
+    var justStarted = true;
     var bonusScore = 1000000000;
-
     var remainingPixels = config.width * config.height;
 
     // TO GO: in the pixel filler to update score according to conquered pixel spaces
@@ -123,11 +120,16 @@
         this.load.image('back','assets/back.png');
         this.load.image('front','assets/front.png');
         this.load.image('bone','assets/bone.png');
+        this.load.image('title', 'assets/Title.png'); //temp title
     }
 
     function create ()
     {
       _this = this;
+      graphics = this.add.graphics({ fillStyle: { color: 0x0000aa } });
+      initBoard();
+
+    
 
       for(i=0;i<numberOfBones;i++)
       {
@@ -135,23 +137,25 @@
         bones.push(fossil1);
       }
 
-
+      for(i=0;i<numberOfSparx;i++)
+      {
+        let point =getRandomPointOnBorder();
+        let newSparx = new sparx(this,point[0],point[1]);
+        sparxs.push(newSparx);
+      }
 
       whiteColor = new Phaser.Display.Color(100, 0, 0);
+        whiteColor = new Phaser.Display.Color(100, 0, 0);
         cursors = this.input.keyboard.createCursorKeys();
         spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        enterButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
         keys = this.input.keyboard
 
         player = this.add.sprite(xBorderShift, yBorderShift, 'player');
         enemy= this.add.sprite(config.width/2,config.height/2,'enemy');
         enemy.alpha=0;
         player.alpha=0;
-
-        sparx1 = this.add.sprite(xBorderShift, config.height-yBorderShift, 'sparx');
-        sparx1.alpha=0;
-        sparx2 = this.add.sprite(config.width-xBorderShift, yBorderShift, 'sparx');
-        sparx2.alpha=0;
-
+        
         fuse = this.add.sprite(-100, -100, 'sparx');
         fuse.alpha=0;
 
@@ -167,15 +171,17 @@
         scoreText.setDepth(UILayer);
         //this.add.rectangle(0, 0, 100, 100, whiteColor.color);
         enemyWidth = enemy.width;
-        graphics = this.add.graphics({ fillStyle: { color: 0x0000aa } });
+
+       
         lineGraphics = this.add.graphics({ fillStyle: { color: 0x0000aa } });
         lineGraphics.setDepth(playerLayer);
 
         shadowGraphics = this.add.graphics({ fillStyle: { color: 0x000000, alpha: 0.3 } });
         shadowGraphics.setDepth(shadowLayer);
+        title = this.add.sprite(330, 390, 'title');
+        title.setDepth(UILayer);
 
         //  The score
-
         //scoreText.sendToFront();
 
         let scale=3;
@@ -190,11 +196,9 @@
         frontTex.mask = new Phaser.Display.Masks.BitmapMask(this, graphics);
         frontTex.setDepth(frontLayer);
 
-
-
         //graphics.fillRectShape(new Rectangle(xBorderShift,yBorderShift,config.width-xBorderShift,config.height -yBorderShift));
 
-        initBoard();
+      
 
         var particles = this.add.particles('green');
         var emitter = particles.createEmitter({
@@ -204,7 +208,6 @@
         });
         particles.setDepth(particleLayer);
 
-
         var particles2 = this.add.particles('red');
 
         var emitter2 = particles2.createEmitter({
@@ -213,24 +216,6 @@
             blendMode: 'ADD'
         });
         particles2.setDepth(particleLayer);
-
-          var sparx1Part = this.add.particles('yellow');
-
-        var sparx1Emitter = sparx1Part.createEmitter({
-            speed: 3,
-            scale: { start: .08, end: .04 },
-            blendMode: 'ADD'
-        });
-        sparx1Part.setDepth(particleLayer);
-
-        var sparx2Part = this.add.particles('yellow');
-
-        var sparx2Emitter = sparx2Part.createEmitter({
-            speed: 3,
-            scale: { start: .08, end: .04 },
-            blendMode: 'ADD'
-        });
-        sparx2Part.setDepth(particleLayer);
 
          var fusePart = this.add.particles('yellow');
 
@@ -243,10 +228,7 @@
         fusePart.setDepth(particleLayer);
 
         emitter.startFollow(player);
-        emitter2.startFollow(enemy);
-
-        sparx1Emitter.startFollow(sparx1);
-        sparx2Emitter.startFollow(sparx2);
+        emitter2.startFollow(enemy);       
 
         fuseEmitter.startFollow(fuse);
 
@@ -258,23 +240,54 @@
         // shadowSprite.setDepth(shadowLayer);
         // shadowSprite.mask = new Phaser.Display.Masks.BitmapMask(this, graphics);
         floodFill(enemy.x,enemy.y);
+    //  if (justStarted == true) {
+
+    //  }
 
     }
 
+function getRandomPointOnBorder()
+{
+  let found=false;
+  letx=0;
+  lety=0;
+  let count=0; 
+  var dir=1;
+
+  if(Math.random()*100>=50)
+  {
+    dir=-1;
+  }
+  
+  
+    x = Math.round(xBorderShift + Math.random()*config.width -xBorderShift);
+    y = Math.round(yBorderShift + Math.random()*config.height-yBorderShift);  
+    console.log(x+' '+y);
+    for(row=y;row<config.height && row>=0;row+=dir)
+    {
+      for(col=x;col<config.width && col>=0;col+=dir)
+      {
+        if(border[get1DIndex(row,col)]==1)
+        {
+          return [col,row];
+        }
+      }
+
+    
+  }
+  return [xBorderShift,yBorderShift];
+}
 
 function update ()
 {
-    if (gameOver)
-    {
-      if (count == 0){
-        count++;
-      }
-      else if (count == 1) {
-        count++;
-      } else if (count == 2) {
-        return;
-      }
-
+    if (Phaser.Input.Keyboard.JustDown(enterButton) && justStarted == true) {
+        justStarted = false;
+        title.visible = false;
+        console.log("Entered");
+    }
+    if (count == 3) {
+      location.reload();
+      count = 0;
     }
 
     if(Phaser.Input.Keyboard.JustDown(spacebar) && !isDrawing)
@@ -285,94 +298,10 @@ function update ()
     }
 
     handleMove();
-    updateEnemy();
-   sparx1Dir= updateSparx(sparx1, sparx1Dir);
-   sparx2Dir= updateSparx(sparx2, sparx2Dir);
+    updateEnemy();   
 }
 
 
-function updateSparx(sparx, sparxDir)
-{
- // 0 right 1 down 2left 3 up
- let newRow = sparx.y;
-    let newCol = sparx.x;
-
-    if(sparxDir==0)//right
-    {
-        newCol++;
-        if(onBorder(newRow,newCol))
-        {
-            sparx.x=newCol;
-            sparx1Dir;
-
-        }else
-        {
-           if(onBorder(sparx.y-1, sparx.x))//check up
-           {
-            sparxDir=1;
-           }else if(onBorder(sparx.y+1, sparx.x))
-           {
-            sparxDir=3;
-           }
-        }
-
-    }else  if(sparxDir==1)//up
-    {
-        newRow--;
-        if(onBorder(newRow,newCol))
-        {
-            sparx.y=newRow;
-
-        }else
-        {
-            if(onBorder(sparx.y, sparx.x-1))//check LEFT
-           {
-            sparxDir=2;
-           }else if(onBorder(sparx.y, sparx.x+1))
-           {
-            sparxDir=0;
-           }
-        }
-
-    }else if(sparxDir==2)//left
-    {
-        newCol--;
-        if(onBorder(newRow,newCol))
-        {
-            sparx.x=newCol;
-
-        }else
-        {
-            if(onBorder(sparx.y+1, sparx.x))//check down
-           {
-            sparxDir=3;
-           }else if(onBorder(sparx.y-1, sparx.x))
-           {
-            sparxDir=1;
-           }
-        }
-
-    }else if(sparxDir==3)//down
-    {
-        newRow++;
-        if(onBorder(newRow,newCol))
-        {
-            sparx.y=newRow;
-
-        }else
-        {
-            if(onBorder(sparx.y, sparx.x-1))//check left
-           {
-            sparxDir=2;
-           }else if(onBorder(sparx.y, sparx.x+1))
-           {
-            sparxDir=0;
-           }
-        }
-
-    }
-    return sparxDir;
-}
 
 function updateEnemy()
 {
@@ -450,24 +379,24 @@ function get1DIndex(row,col)
 function initBoard()
 {
 
-    for(col = 0; col < config.width; col++)
-    {
-        for(row = 0; row < config.height; row++)
-        {
-            //console.log(get1DIndex(row,col));
-            border[get1DIndex(row, col)] = 0;
+    // for(col = 0; col < config.width; col++)
+    // {
+    //     for(row = 0; row < config.height; row++)
+    //     {
+    //         //console.log(get1DIndex(row,col));
+    //         border[get1DIndex(row, col)] = 0;
 
-            if(row == 0 || row == config.height - 1)
-            {
-                border[get1DIndex(row,col)] = 1;
-            }
+    //         if(row == 0 || row == config.height - 1)
+    //         {
+    //             border[get1DIndex(row,col)] = 1;
+    //         }
 
-            if(col == 0 || col == config.width - 1)
-            {
-                border[get1DIndex(row, col)] = 1;
-            }
-        }
-    }
+    //         if(col == 0 || col == config.width - 1)
+    //         {
+    //             border[get1DIndex(row, col)] = 1;
+    //         }
+    //     }
+    // }
 
     // Drawing border
     graphics.lineStyle(2, 0xFFFFFF, 1.0);
@@ -519,17 +448,15 @@ function initBoard()
 
 
 function checkPlayerCollision()
-{
-    if(sparx1.x==player.x && sparx1.y == player.y)
+{ 
+  console.log(sparxs.length);
+  sparxs.forEach(element => {
+    if(element.x==player.x && element.y==player.y)
     {
-        killPlayer();
+      console.log("die");
+      killPlayer();
     }
-
-
-    if(sparx2.x==player.x && sparx2.y == player.y)
-    {
-        killPlayer();
-    }
+  }); 
 }
 
 
@@ -551,7 +478,6 @@ function drawBorders()
 
 function handleMove()
 {
-
     let speed = 0;
     if(drawMode == 0)
     {
@@ -572,7 +498,7 @@ function handleMove()
     for(i = 0; i < speed; i++)
     {
         playerIsMoving=true;
-        checkPlayerCollision();
+        
         let reachedMinPosition = false;
         var newCol = player.x;
         var newRow = player.y;
@@ -598,6 +524,8 @@ function handleMove()
             playerIsMoving=false;
             break;
         }
+        console.log("step");
+        checkPlayerCollision();
 
         if(drawMode == 0) //;free move mode
         {
@@ -1057,12 +985,12 @@ function killPlayer()
       player.y = player.y;
       count++;
     } else if (count == 2) {
+      count++;
       heart3.visible = false;
       player.x=-999;
       player.y=-999;
       enemySpeed=0;
     }
-
 }
 
 function checkUncover()
@@ -1256,7 +1184,6 @@ function floodFill(x, y)
   }*/
 
   var corners = [];
-
   var shadowCorners = [];
 
   //corners.push(new Phaser.Geom.Point(startingX, startingY));
@@ -1435,13 +1362,13 @@ class fossil extends Phaser.Physics.Arcade.Sprite {
     var spPart = scene.add.particles('yellow');
 
     var spEmitter = spPart.createEmitter({
-      speed: 100,
-            scale: { start: .03, end: .02 },
-    blendMode: 'ADD'
+      speed: 50,
+      frequency :450,
+      scale: { start: .08, end: .02 },
+    blendMode: 'ADD'    
 });
-spPart.setDepth(particleLayer);
-spEmitter.startFollow(this);
-
+  spPart.setDepth(particleLayer);
+  spEmitter.startFollow(this);  
   }
 
   update() {
@@ -1456,12 +1383,127 @@ spEmitter.startFollow(this);
   }
 }
 
+class sparx extends Phaser.Physics.Arcade.Sprite {  
+
+
+  constructor(scene, x = 0, y = 0,player, texture = 'sparx') {
+    super(scene, x, y, texture)
+    this.setDepth(UILayer);  
+    scene.add.existing(this); 
+
+    scene.events.on('update', this.update, this);  
+    var sparxPart = scene.add.particles('yellow');
+
+        var sparxEmitter = sparxPart.createEmitter({
+            speed: 3,
+            scale: { start: .08, end: .04 },
+            blendMode: 'ADD'
+        });
+        sparxPart.setDepth(particleLayer);
+        sparxEmitter.startFollow(this);
+
+        this.sparxDir=0;
+        
+        this.lastX=x;
+        this.lastY=y;
+
+  
+  }
+  
+  update() {
+    let newRow = this.y;
+    let newCol = this.x;
+
+    if(this.sparxDir==0)//right
+    {
+        newCol++;
+        if(onBorder(newRow,newCol))
+        {
+          this.x=newCol;
+            this.sparx1Dir;
+
+        }else
+        {
+           if(onBorder(this.y-1, this.x))//check up
+           {
+            this.sparxDir=1;
+           }else if(onBorder(this.y+1, this.x))
+           {
+            this.sparxDir=3;
+           }
+        }
+
+    }else  if(this.sparxDir==1)//up
+    {
+        newRow--;
+        if(onBorder(newRow,newCol))
+        {
+          this.y=newRow;
+
+        }else
+        {
+            if(onBorder(this.y, this.x-1))//check LEFT
+           {
+            this.sparxDir=2;
+           }else if(onBorder(this.y, this.x+1))
+           {
+            this.sparxDir=0;
+           }
+        }
+
+    }else if(this.sparxDir==2)//left
+    {
+        newCol--;
+        if(onBorder(newRow,newCol))
+        {
+          this.x=newCol;
+
+        }else
+        {
+            if(onBorder(this.y+1, this.x))//check down
+           {
+            this.sparxDir=3;
+           }else if(onBorder(this.y-1, this.x))
+           {
+            this.sparxDir=1;
+           }
+        }
+
+    }else if(this.sparxDir==3)//down
+    {
+        newRow++;
+        if(onBorder(newRow,newCol))
+        {
+          this.y=newRow;
+
+        }else
+        {
+            if(onBorder(this.y, this.x-1))//check left
+           {
+            this.sparxDir=2;
+           }else if(onBorder(this.y, this.x+1))
+           {
+            this.sparxDir=0;
+           }
+        }
+
+    }
+
+    if(this.lastX==this.x && this.lastY==this.y)
+    {
+
+    }
+       
+  }
+  
+}
+
     </script>
 </body>
 </div>
 
 <div>
-<p>Welcome to Qix! Ccontrol the green character with the arrow keys. </p>
+<p>Welcome to Qix! Control the green character with the arrow keys. </p>
 <p>Press space to activate drawing mode and try to capture 75% of the board in your squares.</p>
 <p>Press space twice for fast drawing mode. Safer but awards fewer points.</p>
 <p>Don't stop while drawing and watch out for enemies on the board. </p>
