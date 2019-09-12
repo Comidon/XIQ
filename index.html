@@ -531,10 +531,10 @@ function handleMove()
         else
         {
             playerIsMoving=false;
+            checkPlayerCollision();
             break;
         }
-        console.log("step");
-        checkPlayerCollision();
+
 
         if(drawMode == 0) //;free move mode
         {
@@ -543,14 +543,16 @@ function handleMove()
                 player.x=newCol;
                 player.y=newRow;
                 reachedMinPosition=true;
+                checkPlayerCollision();
             }
+
 
         }
         else //drawing mode
         {
             if(!isDrawing)
             {
-                if(withinScreen(newRow,newCol) && !isCaptured(newRow, newCol) && !onBorder(newRow, newCol)) //Player is leaving a border
+                if(withinScreen(newRow,newCol) && !isCaptured(newRow, newCol) && !onBorder(newRow, newCol) && border[get1DIndex(newRow, newCol)] != 0) //Player is leaving a border
                 {
                     console.log("Starting Drawing");
                     borderBackup = border.slice(0); //Backup the current borders in case the player dies and this line will be removed
