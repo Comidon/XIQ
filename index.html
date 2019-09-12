@@ -39,7 +39,7 @@
     var player;
     var enemy;
     var enemyWidth;
-    var enemySpeed=0;
+    var enemySpeed=3;
     var enemyDirectionX=1;
     var enemyDirectionY=1;
     var cursors;
@@ -75,7 +75,8 @@
     var scoreFactor=0;
     var percentage = 0;
 
-    var bone;
+    var bones=[];
+    var numberOfBones=3;
 
     var sparx1;
     var sparx1Dir=0;
@@ -130,6 +131,14 @@
     {
       _this = this;
 
+      for(i=0;i<numberOfBones;i++)
+      {
+        let fossil1 = new fossil(this,xBorderShift + Math.random()*config.width -xBorderShift, yBorderShift + Math.random()*config.height-yBorderShift);
+        bones.push(fossil1);
+      }
+
+     
+
       whiteColor = new Phaser.Display.Color(100, 0, 0);
         cursors = this.input.keyboard.createCursorKeys();
         spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
@@ -155,16 +164,6 @@
         heart2.setDepth(UILayer);
         heart3.setDepth(UILayer);
 
-        bone = this.add.sprite(xBorderShift + Math.random()*config.width -xBorderShift, yBorderShift + Math.random()*config.height-yBorderShift, 'bone');
-        bone.setDepth(fossilLayer);
-        var hintParticles = this.add.particles('yellow');
-        var hintEmitter = hintParticles.createEmitter({
-            speed: 100,
-            scale: { start: .03, end: .02 },
-            blendMode: 'ADD'
-        });
-        hintParticles.setDepth(particleLayer);
-        hintEmitter.startFollow(bone);
 
         scoreText = this.add.text(10, 5, '00', { font: '40px monospace', fill: '#ffffff' });
         scoreText.setDepth(UILayer);
@@ -1421,6 +1420,35 @@ function floodFill(x, y)
 
 
 }
+
+
+class fossil extends Phaser.Physics.Arcade.Sprite {
+  
+
+  constructor(scene, x = 0, y = 0, texture = 'bone') {
+    super(scene, x, y, texture)
+    this.setDepth(fossilLayer);
+    scene.add.existing(this)  ; 
+
+    scene.events.on('update', this.update, this);  
+    var spPart = scene.add.particles('yellow');
+
+    var spEmitter = spPart.createEmitter({
+      speed: 100,
+            scale: { start: .03, end: .02 },
+    blendMode: 'ADD'    
+});
+spPart.setDepth(particleLayer);
+spEmitter.startFollow(this);
+  
+  }
+  
+  update() {
+   
+  }
+  
+}
+
     </script>
 </body>
 </div>
