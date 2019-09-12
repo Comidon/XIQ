@@ -77,7 +77,9 @@
     var percentage = 0;
 
     var bones=[];
+    var bombs=[];
     var numberOfBones=3;
+    var numberOfBombs=2;
 
    var sparxs=[];
    var numberOfSparx=4;
@@ -121,6 +123,7 @@
         this.load.image('front','assets/front.png');
         this.load.image('bone','assets/bone.png');
         this.load.image('title', 'assets/Title.png'); //temp title
+        this.load.image('bomb','assets/bomb.png');
     }
 
     function create ()
@@ -129,12 +132,18 @@
       graphics = this.add.graphics({ fillStyle: { color: 0x0000aa } });
       initBoard();
 
-    
+
 
       for(i=0;i<numberOfBones;i++)
       {
         let fossil1 = new fossil(this,xBorderShift + Math.random()*config.width -xBorderShift, yBorderShift + Math.random()*config.height-yBorderShift);
         bones.push(fossil1);
+      }
+
+      for(i=0;i<numberOfBombs;i++)
+      {
+        let bomb1 = new bomb(this,xBorderShift + Math.random()*config.width -xBorderShift, yBorderShift + Math.random()*config.height-yBorderShift);
+        bombs.push(bomb1);
       }
 
       for(i=0;i<numberOfSparx;i++)
@@ -155,7 +164,7 @@
         enemy= this.add.sprite(config.width/2,config.height/2,'enemy');
         enemy.alpha=0;
         player.alpha=0;
-        
+
         fuse = this.add.sprite(-100, -100, 'sparx');
         fuse.alpha=0;
 
@@ -172,7 +181,7 @@
         //this.add.rectangle(0, 0, 100, 100, whiteColor.color);
         enemyWidth = enemy.width;
 
-       
+
         lineGraphics = this.add.graphics({ fillStyle: { color: 0x0000aa } });
         lineGraphics.setDepth(playerLayer);
 
@@ -198,7 +207,7 @@
 
         //graphics.fillRectShape(new Rectangle(xBorderShift,yBorderShift,config.width-xBorderShift,config.height -yBorderShift));
 
-      
+
 
         var particles = this.add.particles('green');
         var emitter = particles.createEmitter({
@@ -228,7 +237,7 @@
         fusePart.setDepth(particleLayer);
 
         emitter.startFollow(player);
-        emitter2.startFollow(enemy);       
+        emitter2.startFollow(enemy);
 
         fuseEmitter.startFollow(fuse);
 
@@ -251,17 +260,17 @@ function getRandomPointOnBorder()
   let found=false;
   letx=0;
   lety=0;
-  let count=0; 
+  let count=0;
   var dir=1;
 
   if(Math.random()*100>=50)
   {
     dir=-1;
   }
-  
-  
+
+
     x = Math.round(xBorderShift + Math.random()*config.width -xBorderShift);
-    y = Math.round(yBorderShift + Math.random()*config.height-yBorderShift);  
+    y = Math.round(yBorderShift + Math.random()*config.height-yBorderShift);
     console.log(x+' '+y);
     for(row=y;row<config.height && row>=0;row+=dir)
     {
@@ -273,7 +282,7 @@ function getRandomPointOnBorder()
         }
       }
 
-    
+
   }
   return [xBorderShift,yBorderShift];
 }
@@ -298,7 +307,7 @@ function update ()
     }
 
     handleMove();
-    updateEnemy();   
+    updateEnemy();
 }
 
 
@@ -448,7 +457,7 @@ function initBoard()
 
 
 function checkPlayerCollision()
-{ 
+{
   console.log(sparxs.length);
   sparxs.forEach(element => {
     if(element.x==player.x && element.y==player.y)
@@ -456,7 +465,7 @@ function checkPlayerCollision()
       console.log("die");
       killPlayer();
     }
-  }); 
+  });
 }
 
 
@@ -498,7 +507,7 @@ function handleMove()
     for(i = 0; i < speed; i++)
     {
         playerIsMoving=true;
-        
+
         let reachedMinPosition = false;
         var newCol = player.x;
         var newRow = player.y;
@@ -1013,6 +1022,23 @@ function checkUncover()
     }
   });
 
+  bombs.forEach(function(element)
+  {
+    if (!element.detected && element.visible)
+    {
+      let rec = element.getBounds();
+      let recLeft = Math.round(rec.left);
+      let recRight = Math.round(rec.right);
+      let recTop = Math.round(rec.top);
+      let recBottom = Math.round(rec.bottom);
+
+      if ((border[get1DIndex(recTop, recLeft)] != -1) && (border[get1DIndex(recTop, recRight)] != -1) && (border[get1DIndex(recBottom, recLeft)] != -1) && (border[get1DIndex(recBottom, recRight)] != -1))
+      {
+        element.detected = true;
+        //element.visible = false;
+      }
+    }
+    });
 }
 
 function floodFill(x, y)
@@ -1365,10 +1391,10 @@ class fossil extends Phaser.Physics.Arcade.Sprite {
       speed: 50,
       frequency :450,
       scale: { start: .08, end: .02 },
-    blendMode: 'ADD'    
+    blendMode: 'ADD'
 });
   spPart.setDepth(particleLayer);
-  spEmitter.startFollow(this);  
+  spEmitter.startFollow(this);
   }
 
   update() {
@@ -1383,15 +1409,15 @@ class fossil extends Phaser.Physics.Arcade.Sprite {
   }
 }
 
-class sparx extends Phaser.Physics.Arcade.Sprite {  
+class sparx extends Phaser.Physics.Arcade.Sprite {
 
 
   constructor(scene, x = 0, y = 0,player, texture = 'sparx') {
     super(scene, x, y, texture)
-    this.setDepth(UILayer);  
-    scene.add.existing(this); 
+    this.setDepth(UILayer);
+    scene.add.existing(this);
 
-    scene.events.on('update', this.update, this);  
+    scene.events.on('update', this.update, this);
     var sparxPart = scene.add.particles('yellow');
 
         var sparxEmitter = sparxPart.createEmitter({
@@ -1403,13 +1429,13 @@ class sparx extends Phaser.Physics.Arcade.Sprite {
         sparxEmitter.startFollow(this);
 
         this.sparxDir=0;
-        
+
         this.lastX=x;
         this.lastY=y;
 
-  
+
   }
-  
+
   update() {
     let newRow = this.y;
     let newCol = this.x;
@@ -1493,9 +1519,47 @@ class sparx extends Phaser.Physics.Arcade.Sprite {
     {
 
     }
-       
+
   }
-  
+
+}
+
+class bomb extends Phaser.Physics.Arcade.Sprite {
+
+  constructor(scene, x = 0, y = 0, texture = 'bomb') {
+    super(scene, x, y, texture)
+    this.setDepth(fossilLayer);
+    scene.add.existing(this)  ;
+    this.detected = false;
+    this.damaged = false;
+    this.rect = this.getBounds();
+    this.setDisplaySize(70,70);
+
+    scene.events.on('update', this.update, this);
+    var spPart = scene.add.particles('yellow');
+
+    var spEmitter = spPart.createEmitter({
+      speed: 50,
+      frequency :450,
+      scale: { start: .08, end: .02 },
+    blendMode: 'ADD'
+});
+  spPart.setDepth(particleLayer);
+  spEmitter.startFollow(this);
+
+  }
+
+  update() {
+    if (!this.damaged)
+    {
+      if (player.x > this.rect.left && player.x < this.rect.right && player.y > this.rect.top && player.y < this.rect.bottom && drawMode == 2)
+      {
+        this.damaged = true;
+        this.visible = false;
+        killPlayer();
+      }
+    }
+  }
 }
 
     </script>
