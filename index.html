@@ -1069,7 +1069,7 @@ function checkUncover()
 {
   bones.forEach(function(element)
   {
-    if (!element.detected)
+    if (!element.detected && element.visible)
     {
       let rec = element.getBounds();
       let recLeft = Math.round(rec.left);
@@ -1428,6 +1428,8 @@ class fossil extends Phaser.Physics.Arcade.Sprite {
     this.setDepth(fossilLayer);
     scene.add.existing(this)  ;
     this.detected = false;
+    this.damaged = false;
+    this.rect = this.getBounds();
 
     scene.events.on('update', this.update, this);
     var spPart = scene.add.particles('yellow');
@@ -1443,9 +1445,15 @@ spEmitter.startFollow(this);
   }
 
   update() {
-
+    if (!this.damaged)
+    {
+      if (player.x > this.rect.left && player.x < this.rect.right && player.y > this.rect.top && player.y < this.rect.bottom && drawMode == 2)
+      {
+        this.damaged = true;
+        this.visible = false;
+      }
+    }
   }
-
 }
 
     </script>
