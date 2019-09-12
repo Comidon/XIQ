@@ -105,12 +105,7 @@
 
     var bonusScore = 1000000000;
 
-    var collectingScore = 0;
     var remainingPixels = config.width * config.height;
-
-    var boneUncovered = { bool : false };
-
-
 
     // TO GO: in the pixel filler to update score according to conquered pixel spaces
     //
@@ -140,7 +135,7 @@
         bones.push(fossil1);
       }
 
-     
+
 
       whiteColor = new Phaser.Display.Color(100, 0, 0);
         cursors = this.input.keyboard.createCursorKeys();
@@ -1070,28 +1065,26 @@ function killPlayer()
 
 }
 
-function checkUncover(bSprite, bUncovered)
+function checkUncover()
 {
-  if (bUncovered.bool)
+  bones.forEach(function(element)
   {
-    return;
-  }
+    if (!element.detected)
+    {
+      let rec = element.getBounds();
+      let recLeft = Math.round(rec.left);
+      let recRight = Math.round(rec.right);
+      let recTop = Math.round(rec.top);
+      let recBottom = Math.round(rec.bottom);
 
-  let rec = bSprite.getBounds();
-  let recLeft = Math.round(rec.left);
-  let recRight = Math.round(rec.right);
-  let recTop = Math.round(rec.top);
-  let recBottom = Math.round(rec.bottom);
-  console.log(border[get1DIndex(recTop, recLeft)]);
-  console.log(border[get1DIndex(recTop, recRight)]);
-  console.log(border[get1DIndex(recBottom, recLeft)]);
-  console.log(border[get1DIndex(recBottom, recRight)]);
+      if ((border[get1DIndex(recTop, recLeft)] != -1) && (border[get1DIndex(recTop, recRight)] != -1) && (border[get1DIndex(recBottom, recLeft)] != -1) && (border[get1DIndex(recBottom, recRight)] != -1))
+      {
+        score += bonusScore;
+        element.detected = true;
+      }
+    }
+  });
 
-  if ((border[get1DIndex(recTop, recLeft)] != -1) && (border[get1DIndex(recTop, recRight)] != -1) && (border[get1DIndex(recBottom, recLeft)] != -1) && (border[get1DIndex(recBottom, recRight)] != -1))
-  {
-    collectingScore += bonusScore;
-    bUncovered.bool = true;
-  }
 }
 
 function floodFill(x, y)
@@ -1203,9 +1196,9 @@ function floodFill(x, y)
     }
   }
 
-  checkUncover(bone, boneUncovered);
+  checkUncover();
 
-  score = Math.round(collectingScore + scoreFactor * (remainingPixels - tempScore) / 100);
+  score += Math.round(scoreFactor * (remainingPixels - tempScore) / 100);
   remainingPixels = tempScore;
 
   // TODO: Check every bone
@@ -1428,30 +1421,31 @@ function floodFill(x, y)
 
 
 class fossil extends Phaser.Physics.Arcade.Sprite {
-  
+
 
   constructor(scene, x = 0, y = 0, texture = 'bone') {
     super(scene, x, y, texture)
     this.setDepth(fossilLayer);
-    scene.add.existing(this)  ; 
+    scene.add.existing(this)  ;
+    this.detected = false;
 
-    scene.events.on('update', this.update, this);  
+    scene.events.on('update', this.update, this);
     var spPart = scene.add.particles('yellow');
 
     var spEmitter = spPart.createEmitter({
       speed: 100,
             scale: { start: .03, end: .02 },
-    blendMode: 'ADD'    
+    blendMode: 'ADD'
 });
 spPart.setDepth(particleLayer);
 spEmitter.startFollow(this);
-  
+
   }
-  
+
   update() {
-   
+
   }
-  
+
 }
 
     </script>
