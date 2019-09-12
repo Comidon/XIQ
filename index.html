@@ -1048,6 +1048,11 @@ function killPlayer()
 
 }
 
+function checkUncover(bSprite)
+{
+  bSprite.get
+}
+
 function floodFill(x, y)
 {
   let tempScore = 0;
@@ -1068,8 +1073,8 @@ function floodFill(x, y)
   set[get1DIndex(y, x)] = 1;
 
   var shapeBorderSet = [];
-  var startingX;
-  var startingY;
+  var startingX = x;
+  var startingY = y;
 
   tempScore++;
 
@@ -1089,8 +1094,11 @@ function floodFill(x, y)
     else if (onBorder(tempY + 1, tempX))
     {
       shapeBorderSet[get1DIndex(tempY, tempX)] = 1;
-      startingX = tempX;
-      startingY = tempY;
+      if (tempX > startingX)
+      {
+        startingX = tempX;
+        startingY = tempY;
+      }
     }
 
     if (!onBorder(tempY - 1, tempX) && set[get1DIndex(tempY - 1, tempX)] != 1)
@@ -1104,8 +1112,11 @@ function floodFill(x, y)
     else if (onBorder(tempY - 1, tempX))
     {
       shapeBorderSet[get1DIndex(tempY, tempX)] = 1;
-      startingX = tempX;
-      startingY = tempY;
+      if (tempX > startingX)
+      {
+        startingX = tempX;
+        startingY = tempY;
+      }
     }
 
     if (!onBorder(tempY, tempX + 1) && set[get1DIndex(tempY, tempX + 1)] != 1)
@@ -1119,8 +1130,11 @@ function floodFill(x, y)
     else if (onBorder(tempY, tempX + 1))
     {
       shapeBorderSet[get1DIndex(tempY, tempX)] = 1;
-      startingX = tempX;
-      startingY = tempY;
+      if (tempX > startingX)
+      {
+        startingX = tempX;
+        startingY = tempY;
+      }
     }
 
     if (!onBorder(tempY, tempX - 1) && set[get1DIndex(tempY, tempX - 1)] != 1)
@@ -1134,8 +1148,11 @@ function floodFill(x, y)
     else if (onBorder(tempY, tempX - 1))
     {
       shapeBorderSet[get1DIndex(tempY, tempX)] = 1;
-      startingX = tempX;
-      startingY = tempY;
+      if (tempX > startingX)
+      {
+        startingX = tempX;
+        startingY = tempY;
+      }
     }
   }
 
