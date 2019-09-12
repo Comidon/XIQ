@@ -44,6 +44,7 @@
     var enemyDirectionY=1;
     var cursors;
     var spacebar;
+    var enterButton;
     var gameOver = false;
     var input;
     var slowSpeed = 5;
@@ -85,8 +86,6 @@
     var scoreText;
     var winText;
 
-
-
     var backTex;
     var frontTex;
 
@@ -100,15 +99,10 @@
 
     var shadowWidth=10;
     var count = 0;
-
+    var title; //temp title
+    var justStarted = true;
     var bonusScore = 1000000000;
-
-    var collectingScore = 0;
     var remainingPixels = config.width * config.height;
-
-    var boneUncovered = { bool : false };
-
-
 
     // TO GO: in the pixel filler to update score according to conquered pixel spaces
     //
@@ -126,6 +120,7 @@
         this.load.image('back','assets/back.png');
         this.load.image('front','assets/front.png');
         this.load.image('bone','assets/bone.png');
+        this.load.image('title', 'assets/Title.png'); //temp title
     }
 
     function create ()
@@ -150,8 +145,10 @@
       }
 
       whiteColor = new Phaser.Display.Color(100, 0, 0);
+        whiteColor = new Phaser.Display.Color(100, 0, 0);
         cursors = this.input.keyboard.createCursorKeys();
         spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        enterButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
         keys = this.input.keyboard
 
         player = this.add.sprite(xBorderShift, yBorderShift, 'player');
@@ -181,9 +178,10 @@
 
         shadowGraphics = this.add.graphics({ fillStyle: { color: 0x000000, alpha: 0.3 } });
         shadowGraphics.setDepth(shadowLayer);
+        title = this.add.sprite(330, 390, 'title');
+        title.setDepth(UILayer);
 
         //  The score
-
         //scoreText.sendToFront();
 
         let scale=3;
@@ -198,8 +196,6 @@
         frontTex.mask = new Phaser.Display.Masks.BitmapMask(this, graphics);
         frontTex.setDepth(frontLayer);
 
-
-
         //graphics.fillRectShape(new Rectangle(xBorderShift,yBorderShift,config.width-xBorderShift,config.height -yBorderShift));
 
       
@@ -211,7 +207,6 @@
             blendMode: 'ADD'
         });
         particles.setDepth(particleLayer);
-
 
         var particles2 = this.add.particles('red');
 
@@ -245,6 +240,9 @@
         // shadowSprite.setDepth(shadowLayer);
         // shadowSprite.mask = new Phaser.Display.Masks.BitmapMask(this, graphics);
         floodFill(enemy.x,enemy.y);
+    //  if (justStarted == true) {
+
+    //  }
 
     }
 
@@ -282,17 +280,14 @@ function getRandomPointOnBorder()
 
 function update ()
 {
-    if (gameOver)
-    {
-      if (count == 0){
-        count++;
-      }
-      else if (count == 1) {
-        count++;
-      } else if (count == 2) {
-        return;
-      }
-
+    if (Phaser.Input.Keyboard.JustDown(enterButton) && justStarted == true) {
+        justStarted = false;
+        title.visible = false;
+        console.log("Entered");
+    }
+    if (count == 3) {
+      location.reload();
+      count = 0;
     }
 
     if(Phaser.Input.Keyboard.JustDown(spacebar) && !isDrawing)
@@ -483,7 +478,6 @@ function drawBorders()
 
 function handleMove()
 {
-
     let speed = 0;
     if(drawMode == 0)
     {
@@ -991,36 +985,34 @@ function killPlayer()
       player.y = player.y;
       count++;
     } else if (count == 2) {
+      count++;
       heart3.visible = false;
       player.x=-999;
       player.y=-999;
       enemySpeed=0;
     }
-
 }
 
-function checkUncover(bSprite, bUncovered)
+function checkUncover()
 {
-  if (bUncovered.bool)
+  bones.forEach(function(element)
   {
-    return;
-  }
+    if (!element.detected && element.visible)
+    {
+      let rec = element.getBounds();
+      let recLeft = Math.round(rec.left);
+      let recRight = Math.round(rec.right);
+      let recTop = Math.round(rec.top);
+      let recBottom = Math.round(rec.bottom);
 
-  let rec = bSprite.getBounds();
-  let recLeft = Math.round(rec.left);
-  let recRight = Math.round(rec.right);
-  let recTop = Math.round(rec.top);
-  let recBottom = Math.round(rec.bottom);
-  console.log(border[get1DIndex(recTop, recLeft)]);
-  console.log(border[get1DIndex(recTop, recRight)]);
-  console.log(border[get1DIndex(recBottom, recLeft)]);
-  console.log(border[get1DIndex(recBottom, recRight)]);
+      if ((border[get1DIndex(recTop, recLeft)] != -1) && (border[get1DIndex(recTop, recRight)] != -1) && (border[get1DIndex(recBottom, recLeft)] != -1) && (border[get1DIndex(recBottom, recRight)] != -1))
+      {
+        score += bonusScore;
+        element.detected = true;
+      }
+    }
+  });
 
-  if ((border[get1DIndex(recTop, recLeft)] != -1) && (border[get1DIndex(recTop, recRight)] != -1) && (border[get1DIndex(recBottom, recLeft)] != -1) && (border[get1DIndex(recBottom, recRight)] != -1))
-  {
-    collectingScore += bonusScore;
-    bUncovered.bool = true;
-  }
 }
 
 function floodFill(x, y)
@@ -1132,9 +1124,9 @@ function floodFill(x, y)
     }
   }
 
-  //checkUncover(bone, boneUncovered);
+  checkUncover();
 
-  score = Math.round(collectingScore + scoreFactor * (remainingPixels - tempScore) / 100);
+  score += Math.round(scoreFactor * (remainingPixels - tempScore) / 100);
   remainingPixels = tempScore;
 
   // TODO: Check every bone
@@ -1192,7 +1184,6 @@ function floodFill(x, y)
   }*/
 
   var corners = [];
-
   var shadowCorners = [];
 
   //corners.push(new Phaser.Geom.Point(startingX, startingY));
@@ -1357,14 +1348,17 @@ function floodFill(x, y)
 
 
 class fossil extends Phaser.Physics.Arcade.Sprite {
-  
+
 
   constructor(scene, x = 0, y = 0, texture = 'bone') {
     super(scene, x, y, texture)
     this.setDepth(fossilLayer);
-    scene.add.existing(this)  ; 
+    scene.add.existing(this)  ;
+    this.detected = false;
+    this.damaged = false;
+    this.rect = this.getBounds();
 
-    scene.events.on('update', this.update, this);  
+    scene.events.on('update', this.update, this);
     var spPart = scene.add.particles('yellow');
 
     var spEmitter = spPart.createEmitter({
@@ -1376,11 +1370,17 @@ class fossil extends Phaser.Physics.Arcade.Sprite {
   spPart.setDepth(particleLayer);
   spEmitter.startFollow(this);  
   }
-  
+
   update() {
-   
+    if (!this.damaged)
+    {
+      if (player.x > this.rect.left && player.x < this.rect.right && player.y > this.rect.top && player.y < this.rect.bottom && drawMode == 2)
+      {
+        this.damaged = true;
+        this.visible = false;
+      }
+    }
   }
-  
 }
 
 class sparx extends Phaser.Physics.Arcade.Sprite {  
@@ -1503,7 +1503,7 @@ class sparx extends Phaser.Physics.Arcade.Sprite {
 </div>
 
 <div>
-<p>Welcome to Qix! Ccontrol the green character with the arrow keys. </p>
+<p>Welcome to Qix! Control the green character with the arrow keys. </p>
 <p>Press space to activate drawing mode and try to capture 75% of the board in your squares.</p>
 <p>Press space twice for fast drawing mode. Safer but awards fewer points.</p>
 <p>Don't stop while drawing and watch out for enemies on the board. </p>
