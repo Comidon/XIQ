@@ -14,8 +14,8 @@
 
     var config = {
         type: Phaser.AUTO,
-        width: 700,
-        height: 700,
+        width: 1920,
+        height: 1080,
         physics: {
             default: 'arcade',
             arcade: {
@@ -25,6 +25,7 @@
         },
 
         scene: {
+            init: init,
             preload: preload,
             create: create,
             update: update
@@ -33,13 +34,24 @@
 
     var game = new Phaser.Game(config);
 
-    var xBorderShift=15;//how far in to shift the game board from the screen width
-    var yBorderShift=50;
+    var gameWidth = 800;
+    var gameHeight = 800;
+
+
+
+    var xBorderShift=(config.width-gameWidth)/2;//how far in to shift the game board from the screen width
+    var yBorderShift=(config.height-gameHeight)/2;   
+
+    var xMin = xBorderShift;
+    var xMax = config.width-xBorderShift;
+
+    var yMin = yBorderShift;
+    var yMax = config.height-yBorderShift;
 
     var player;
     var enemy;
     var enemyWidth;
-    var enemySpeed=2;
+    var enemySpeed=0;
     var enemyDirectionX=1;
     var enemyDirectionY=1;
     var cursors;
@@ -48,10 +60,8 @@
     var gameOver = false;
     var input;
     var slowSpeed = 2;
-    var fastSpeed = 2 * slowSpeed;
-    var board = []; // pixel values: 1 == is
-    var border = [];
-    var borderBackup = [];
+    var fastSpeed = 2 * slowSpeed;   
+    var border;    
     var drawMode = 0; //0: none 1:slow 2: fast
     var isDrawing = false;
     var playerIsMoving=false;
@@ -82,7 +92,7 @@
     var numberOfBombs=2;
 
    var sparxs=[];
-   var numberOfSparx=4;
+   var numberOfSparx=0;
 
 
     var scoreText;
@@ -106,9 +116,22 @@
     var bonusScore = 1000000000;
     var remainingPixels = config.width * config.height;
 
+  var useFullscreen=true;
     // TO GO: in the pixel filler to update score according to conquered pixel spaces
     //
     //scoreText.setText(score += pixelNum);
+function init()
+{
+  var canvas = this.sys.game.canvas;
+    var fullscreen = this.sys.game.device.fullscreen;
+
+    if (!fullscreen.available || !useFullscreen)
+    {
+        return;
+    }
+
+    canvas[fullscreen.request]();
+}
 
     function preload ()
     {
@@ -138,7 +161,7 @@
 
       for(i=0;i<numberOfBones;i++)
       {
-        let fossil1 = new fossil(this,xBorderShift + Math.random()*config.width -xBorderShift, yBorderShift + Math.random()*config.height-yBorderShift);
+        let fossil1 = new fossil(this,randomIntFromInterval(xMin,xMax),randomIntFromInterval(yMin,yMax));
         bones.push(fossil1);
       }
 
@@ -196,13 +219,13 @@
         //  The score
         //scoreText.sendToFront();
 
-        let scale=3;
-        backTex = this.add.sprite(0, 0, 'back');
+        let scale=3.3;
+        backTex = this.add.sprite(xBorderShift, yBorderShift, 'back');
 
         backTex.setDisplaySize(backTex.width*scale,backTex.height*scale);
         backTex.setDepth(backLayer);
 
-        frontTex = this.add.sprite(0, 0, 'front');
+        frontTex = this.add.sprite(xBorderShift, yBorderShift, 'front');
 
         frontTex.setDisplaySize(frontTex.width*scale,frontTex.height*scale);
         frontTex.mask = new Phaser.Display.Masks.BitmapMask(this, graphics);
@@ -251,12 +274,19 @@
         // shadowSprite = this.add.sprite(0,0,"shadow");
         // shadowSprite.setDepth(shadowLayer);
         // shadowSprite.mask = new Phaser.Display.Masks.BitmapMask(this, graphics);
+       
         floodFill(enemy.x,enemy.y);
+       
     //  if (justStarted == true) {
 
     //  }
 
     }
+
+function randomIntFromInterval(min, max) 
+{ // min and max included 
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
 
 function getRandomPointOnBorder()
 {
@@ -416,24 +446,17 @@ function get1DIndex(row,col)
 function initBoard()
 {
 
-    // for(col = 0; col < config.width; col++)
-    // {
-    //     for(row = 0; row < config.height; row++)
-    //     {
-    //         //console.log(get1DIndex(row,col));
-    //         border[get1DIndex(row, col)] = 0;
+    border = new Uint8Array(config.width*config.height);
 
-    //         if(row == 0 || row == config.height - 1)
-    //         {
-    //             border[get1DIndex(row,col)] = 1;
-    //         }
-
-    //         if(col == 0 || col == config.width - 1)
-    //         {
-    //             border[get1DIndex(row, col)] = 1;
-    //         }
-    //     }
-    // }
+    for(col = xMin; col < xMax; col++)
+    {
+        for(row = yMin; row < yMax; row++)
+        {
+           // console.log(get1DIndex(row,col));
+            border[get1DIndex(row, col)] = 0;
+            
+        }
+    }
 
     // Drawing border
     graphics.lineStyle(2, 0xFFFFFF, 1.0);
@@ -462,24 +485,24 @@ function initBoard()
     graphics.strokePath();
 
 
-    for(i=xBorderShift;i<config.width-xBorderShift;i++)
+    for(i=xMin;i<=xMax;i++)
     {
-        border[get1DIndex(yBorderShift, i)] = 1;
+       border[get1DIndex(yMin, i)] = 1;
     }
 
-    for(i=yBorderShift;i<config.height-yBorderShift;i++)
+    for(i=yMin;i<=yMax;i++)
     {
-        border[get1DIndex(i, xBorderShift)] = 1;
+        border[get1DIndex(i, xMin)] = 1;
     }
 
-    for(i=yBorderShift;i<config.height-yBorderShift;i++)
+    for(i=yMin;i<=yMax;i++)
     {
-        border[get1DIndex(i, config.width-xBorderShift)] = 1;
+        border[get1DIndex(i, xMax)] = 1;
     }
 
-    for(i=xBorderShift;i<=config.width-xBorderShift;i++)
+    for(i=xMin;i<=xMax;i++)
     {
-        border[get1DIndex(config.height-yBorderShift, i)] = 1;
+        border[get1DIndex(yMax, i)] = 1;
     }
 }
 
@@ -583,7 +606,7 @@ function handleMove()
                 if(withinScreen(newRow,newCol) && !isCaptured(newRow, newCol) && !onBorder(newRow, newCol) && border[get1DIndex(newRow, newCol)] != 0) //Player is leaving a border
                 {
                     console.log("Starting Drawing");
-                    borderBackup = border.slice(0); //Backup the current borders in case the player dies and this line will be removed
+                    //borderBackup = border.slice(0); //Backup the current borders in case the player dies and this line will be removed
 
                     player.x = newCol;
                     player.y = newRow;
@@ -754,9 +777,9 @@ function recalcBorders()
 
 function resetEnemyArea()
 {
-    for(col = 0; col < config.width; col++)
+    for(col = yMin; col < yMax; col++)
     {
-        for(row = 0;row < config.height; row++)
+        for(row = xMin;row < xMax; row++)
         {
           if (border[get1DIndex(row,col)] != 1)
           {
@@ -768,6 +791,12 @@ function resetEnemyArea()
 
 function borderFloodFill(data,row,col)
 {
+  console.log("flood start (border)");
+
+  if (onBorder(row, col) || !withinScreen(row,col))
+  {
+    return;
+  }
     let replaceVal=3;
 
     data[get1DIndex(row,col)]=replaceVal;
@@ -784,7 +813,7 @@ function borderFloodFill(data,row,col)
 
         let nx = Qx.shift();
         let ny = Qy.shift();
-
+        
 
         let north = ny-1;
         let south = ny+1;
@@ -864,6 +893,7 @@ function borderFloodFill(data,row,col)
             newBorders.push(south);
         }
     }
+    console.log("flood stop (border)");
     return newBorders;
 }
 
@@ -980,11 +1010,11 @@ function isCaptured(row, col)//Will eventually tell whether this point has been 
 
 function withinScreen(row, col)
 {
-    if(row < yBorderShift || col < xBorderShift)
+    if(row < yMin || col < xMin)
     {
         return false;
     }
-    else if(row >= config.height-yBorderShift || col >= config.width-xBorderShift)
+    else if(row >= yMax || col >= xMax)
     {
         return false;
     }
@@ -1073,18 +1103,20 @@ function checkUncover()
 
 function floodFill(x, y)
 {
+  console.log("flood start");
+  let count=0;
   resetEnemyArea();
   let tempScore = 0;
 
-  if (onBorder(y, x))
+  if (onBorder(y, x) || !withinScreen(y,x))
   {
     return;
   }
 
-  graphics.fillPoint(x, y);//Is this needed?
+  //graphics.fillPoint(x, y);//Is this needed?
 
-  var queue = [];
-  var set = [];
+  let queue = [];
+  let set = new Uint8Array(border.length);
 
   queue.push(x);
   queue.push(y);
@@ -1092,16 +1124,23 @@ function floodFill(x, y)
   set[get1DIndex(y, x)] = 1;
   border[get1DIndex(y, x)] = -1;
 
-  var shapeBorderSet = [];
-  var startingX = x;
-  var startingY = y;
+  let shapeBorderSet = new Uint8Array(border.length);
+  let startingX = x;
+  let startingY = y;
 
   tempScore++;
 
+console.log("Enter loop");
   while (queue.length > 0)
   {
-    var tempX = queue.shift();
-    var tempY = queue.shift();
+    if(queue.length>count)
+    {
+      count = queue.length;
+    }
+    
+   // console.log("loop");
+    let tempX = queue.shift();
+    let tempY = queue.shift();   
 
     if (!onBorder(tempY + 1, tempX) && set[get1DIndex(tempY + 1, tempX)] != 1)
     {
@@ -1180,6 +1219,8 @@ function floodFill(x, y)
     }
   }
 
+console.log("End loop");
+console.log("---------"+count+" Iterations----------");
   checkUncover();
 
   score += Math.round(scoreFactor * (remainingPixels - tempScore) / 100);
@@ -1250,7 +1291,7 @@ function floodFill(x, y)
 
   //while (!((startingX == runningX) && (startingY == runningY)))
   while (check)
-  {
+  {   
     if (checkingDir == 0)
     {
       if (shapeBorderSet[get1DIndex(runningY, runningX + 1)] != 1)
@@ -1399,7 +1440,7 @@ function floodFill(x, y)
   //shadowSprite.tint = 0x000000;
  //shadowSprite.alpha = 0.6;
 
-
+ console.log("flood end");
 }
 
 
