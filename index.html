@@ -167,7 +167,7 @@ function init()
 
       for(i=0;i<numberOfBombs;i++)
       {
-        let bomb1 = new bomb(this,xBorderShift + Math.random()*config.width -xBorderShift, yBorderShift + Math.random()*config.height-yBorderShift);
+        let bomb1 = new bomb(this,randomIntFromInterval(xMin,xMax),randomIntFromInterval(yMin,yMax));
         bombs.push(bomb1);
       }
 
@@ -302,8 +302,8 @@ function getRandomPointOnBorder()
   }
 
 
-    x = Math.round(xBorderShift + Math.random()*config.width -xBorderShift);
-    y = Math.round(yBorderShift + Math.random()*config.height-yBorderShift);
+    x = Math.round(randomIntFromInterval(xMin,xMax));
+    y = Math.round(randomIntFromInterval(yMin,yMax));
     console.log(x+' '+y);
     for(row=y;row<config.height && row>=0;row+=dir)
     {
