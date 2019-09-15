@@ -92,7 +92,7 @@
     var numberOfBombs=3;
 
    var sparxs=[];
-   var numberOfSparx=3;
+   var numberOfSparx=0;
 
 
     var scoreText;
@@ -219,14 +219,14 @@ function init()
         //  The score
         //scoreText.sendToFront();
 
-        let scale=3.3;
-        backTex = this.add.sprite(xBorderShift, yBorderShift, 'back');
+        let scale=1.56;
+        backTex = this.add.sprite(xBorderShift, yBorderShift, 'back').setOrigin(0,0);
+        
 
         backTex.setDisplaySize(backTex.width*scale,backTex.height*scale);
         backTex.setDepth(backLayer);
 
-        frontTex = this.add.sprite(xBorderShift, yBorderShift, 'front');
-
+        frontTex = this.add.sprite(xBorderShift, yBorderShift, 'front').setOrigin(0,0);        
         frontTex.setDisplaySize(frontTex.width*scale,frontTex.height*scale);
         frontTex.mask = new Phaser.Display.Masks.BitmapMask(this, graphics);
         frontTex.setDepth(frontLayer);
