@@ -92,7 +92,7 @@
     var numberOfBombs=2;
 
    var sparxs=[];
-   var numberOfSparx=0;
+   var numberOfSparx=2;
 
 
     var scoreText;
@@ -116,21 +116,20 @@
     var bonusScore = 1000000000;
     var remainingPixels = config.width * config.height;
 
-  var useFullscreen=true;
+    var canvas;
+    var fullscreen;
+
+  var useFullscreen=false;
     // TO GO: in the pixel filler to update score according to conquered pixel spaces
     //
     //scoreText.setText(score += pixelNum);
 function init()
 {
-  var canvas = this.sys.game.canvas;
-    var fullscreen = this.sys.game.device.fullscreen;
+  _this = this;
+  canvas = this.sys.game.canvas;
+  fullscreen = this.sys.game.device.fullscreen;
+  requestFullscreen();
 
-    if (!fullscreen.available || !useFullscreen)
-    {
-        return;
-    }
-
-    canvas[fullscreen.request]();
 }
 
     function preload ()
@@ -153,7 +152,7 @@ function init()
 
     function create ()
     {
-      _this = this;
+      
       graphics = this.add.graphics({ fillStyle: { color: 0x0000aa } });
       initBoard();
 
@@ -178,7 +177,7 @@ function init()
         sparxs.push(newSparx);
       }
 
-      whiteColor = new Phaser.Display.Color(100, 0, 0);
+       whiteColor = new Phaser.Display.Color(100, 0, 0);
         whiteColor = new Phaser.Display.Color(100, 0, 0);
         cursors = this.input.keyboard.createCursorKeys();
         spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
@@ -282,6 +281,17 @@ function init()
     //  }
 
     }
+
+
+function requestFullscreen()
+{
+  if (!fullscreen.available || !useFullscreen)
+    {
+        return;
+    }
+
+    canvas[fullscreen.request]();
+}
 
 function randomIntFromInterval(min, max) 
 { // min and max included 
@@ -647,6 +657,7 @@ function handleMove()
                     }
                     drawMode = 0;
                     isDrawing = false;
+                    
                     processCapture();
                 }else if(!isTemporary(newRow,newCol))//player is still drawing move them along as long as they don't cross their own path
                 {
@@ -721,9 +732,9 @@ function addPlayerPositionToBorder() //Adds the current player position onto the
 
 function addAllTemporaryBorders()
 {
-    for(col = 0; col < config.width; col++)
+    for(col = xMin; col <= xMax; col++)
     {
-        for(row = 0;row < config.height; row++)
+        for(row = yMin;row <= yMax; row++)
         {
             //console.log(get1DIndex(row,col));
             if(border[get1DIndex(row, col)] == 2)
@@ -739,7 +750,7 @@ function processCapture()//player has completed a square, process it
 {
     graphics.clear();
     shadowGraphics.clear();
-    console.log("Done Drawing!");
+    console.log("Done Drawing!");    
     addAllTemporaryBorders();
     let startPoint = checkWhichPointToFill();
     floodFill(startPoint[0], startPoint[1]);
@@ -753,9 +764,9 @@ function recalcBorders()
     let newBorders =borderFloodFill(borderCopy,enemy.y,enemy.x);
     //console.log(newBorders.length);
 
-    for(col = 0; col < config.width; col++)
+    for(col = xMin; col <= xMax; col++)
     {
-        for(row = 0;row < config.height; row++)
+        for(row = yMin;row <= yMax; row++)
         {
           if (border[get1DIndex(row,col)] != -1)
           {
@@ -769,9 +780,7 @@ function recalcBorders()
         let newY = newBorders.pop();
         let newX = newBorders.pop();
         border[get1DIndex(newY,newX)]=1;
-    }
-
-
+    }   
 
 }
 
@@ -792,11 +801,7 @@ function resetEnemyArea()
 function borderFloodFill(data,row,col)
 {
   console.log("flood start (border)");
-
-  if (onBorder(row, col) || !withinScreen(row,col))
-  {
-    return;
-  }
+ 
     let replaceVal=3;
 
     data[get1DIndex(row,col)]=replaceVal;
@@ -1014,7 +1019,7 @@ function withinScreen(row, col)
     {
         return false;
     }
-    else if(row >= yMax || col >= xMax)
+    else if(row > yMax || col > xMax)
     {
         return false;
     }
