@@ -127,8 +127,8 @@
     var canvas;
     var fullscreen;
 
-    var segmentEnemy;
-    var enemyLength=3;
+    //var segmentEnemy;
+    var enemyLength=10;
 
     // TO GO: in the pixel filler to update score according to conquered pixel spaces
     //
@@ -191,7 +191,7 @@ function init()
       }  
 
 
-      segmentEnemy = new enemyChain(this,config.width/2,config.height/2,enemyLength,enemySpeed);
+      //segmentEnemy = new enemyChain(this,config.width/2,config.height/2,enemyLength,enemySpeed);
       
 
 
@@ -207,7 +207,7 @@ function init()
         resetPlayerPosition();
 
 
-        enemy = new enemyChain(this,randomIntFromInterval(xMin,xMax),randomIntFromInterval(yMin,yMax), 5);
+        enemy = new enemyChain(this,randomIntFromInterval(xMin,xMax),randomIntFromInterval(yMin,yMax), enemyLength);
         //enemy.setDepth(playerLayer);
         //enemy.alpha=0;
         //player.alpha=0;
@@ -1957,7 +1957,7 @@ class enemyChain
     scene.events.on('update', this.update, this);
 
     }
-  }
+  
 
   update()
   {
@@ -2005,61 +2005,9 @@ class enemyChain
   }
 }
 
-    if((Math.random()*100)<=1)
-    {
-        if((Math.random()*100)<=50)
-        {
-            this.DirectionX=-this.DirectionX;
-        }else
-        {
-            this.DirectionY=-this.DirectionY;
-        }
-    }
-    if(this.DirectionX>0)
-    {
-      if(this.DirectionY>0)
-      {
-        head.rotation=135*(Math.PI/180);
+  
+ 
 
-      }else
-      {
-        head.rotation=45*(Math.PI/180);
-      }
-
-    }else
-    {
-      if(this.DirectionY>0)
-      {
-        head.rotation=225*(Math.PI/180);
-      }else
-      {
-        head.rotation=315*(Math.PI/180);
-
-      }
-
-    }
-
-    this.rotations.push(head.rotation);
-  }
-
-  moveBody()
-  {
-
-   for(i=1;i<this.chain.length;i++) 
-    {
-      let index =i*this.spacing+this.chain[i].index;
-      if(index<this.pathX.length)
-      {      
-        console.log("here");
-        this.chain[i].x= this.pathX[index];
-        this.chain[i].y= this.pathY[index];
-        this.chain[i].rotation = this.rotations[index];
-        this.chain[i].index=index;
-      }
-    }
-  }
-
-}
 
   </script>
 </body>
