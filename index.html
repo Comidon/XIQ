@@ -1633,14 +1633,14 @@ class fossil extends Phaser.Physics.Arcade.Sprite {
     scene.events.on('update', this.update, this);
     var spPart = scene.add.particles('yellow');
 
-    var spEmitter = spPart.createEmitter({
+    this.spEmitter = spPart.createEmitter({
       speed: 50,
       frequency :450,
       scale: { start: .08, end: .02 },
     blendMode: 'ADD'
 });
   spPart.setDepth(particleLayer);
-  spEmitter.startFollow(this);
+  this.spEmitter.startFollow(this);
   }
 
   update() {
@@ -1653,6 +1653,7 @@ class fossil extends Phaser.Physics.Arcade.Sprite {
         this.visible = false;
         score -= punishScore;
         scoreText.setText(score);
+        this.spEmitter.visible=false;
       }
     }
   }
