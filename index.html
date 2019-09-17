@@ -58,6 +58,7 @@
     var enemy;
     var enemyWidth;
     var enemySpeed=3;
+    var enemyLength=10;
     var enemyDirectionX=1;
     var enemyDirectionY=1;
     var cursors;
@@ -128,7 +129,7 @@
     var fullscreen;
 
     //var segmentEnemy;
-    var enemyLength=10;
+  
 
     // TO GO: in the pixel filler to update score according to conquered pixel spaces
     //
@@ -1890,7 +1891,7 @@ class enemySegment extends Phaser.Physics.Arcade.Sprite
     super(scene, x, y, texture);
     this.setDepth(playerLayer);
     this.setDisplaySize(70,70);
-    this.spacing =50;
+    this.spacing =45;
 
     scene.add.existing(this);
     scene.events.on('update', this.update, this);
