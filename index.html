@@ -197,10 +197,10 @@ function init()
         player = this.add.sprite(xBorderShift, yBorderShift, 'player');
         player.setDepth(playerLayer);
         resetPlayerPosition();
-       
 
-        enemy= this.add.sprite(config.width/2,config.height/2,'enemy');
-        enemy.setDepth(playerLayer);
+
+        enemy = new enemyChain(this,randomIntFromInterval(xMin,xMax),randomIntFromInterval(yMin,yMax), 5);
+        //enemy.setDepth(playerLayer);
         //enemy.alpha=0;
         //player.alpha=0;
 
@@ -255,7 +255,7 @@ function init()
             blendMode: 'ADD'
         });
         blueParticles.setDepth(particleLayer);
-        
+
         blueEmitter.startFollow(player);
         blueEmitter.visible=false;
 
@@ -267,7 +267,7 @@ function init()
         });
         redParticles.setDepth(particleLayer);
         redEmitter.visible=false;
-        
+
         redEmitter.startFollow(player);
 
         var particles2 = this.add.particles('red');
@@ -332,7 +332,7 @@ function getRandomPointOnBorder()
   letx=0;
   lety=0;
   let count=0;
-  let dir=1;  
+  let dir=1;
 
 while(!found)
 {
@@ -361,7 +361,7 @@ while(!found)
       }
   }
 }
-  
+
   return [xBorderShift,yBorderShift];
 }
 
@@ -396,7 +396,8 @@ function update ()
     updatePlayerParticles();
 
     handleMove();
-    updateEnemy();
+    //enemy.update();
+    //updateEnemy();
 }
 
 function updatePlayerParticles()
@@ -656,10 +657,10 @@ function handleMove()
           {
             player.rotation=-Math.PI/2;
           }
-          
-         
+
+
             newRow -= 1;
-           
+
         }
         else if (cursors.down.isDown)
         {
@@ -670,8 +671,8 @@ function handleMove()
           {
             player.rotation=Math.PI/2;
           }
-         
-        
+
+
             newRow += 1;
         }
         else
@@ -860,15 +861,15 @@ if(!bomb)
     recalcBorders();
    //printBorders();
 }else
-{  
+{
     graphics.clear();
-    shadowGraphics.clear();    
-    addAllTemporaryBorders();   
+    shadowGraphics.clear();
+    addAllTemporaryBorders();
     floodFill(enemy.x,enemy.y);
     recalcBorders();
-   
+
 }
-   
+
 }
 function recalcBorders()
 {
@@ -1209,7 +1210,7 @@ function resetPlayerPosition()
     player.x=point[0];
     player.y=point[1];
   }
-  
+
 
 }
 
@@ -1829,19 +1830,19 @@ class bomb extends Phaser.Physics.Arcade.Sprite {
       if (player.x > this.rect.left && player.x < this.rect.right && player.y > this.rect.top && player.y < this.rect.bottom && drawMode == 2)
       {
         this.damaged = true;
-        this.visible = false;  
+        this.visible = false;
         this.spEmitter.visible=false;
         this.spEmitter = this.spPart.createEmitter({
       speed: 100,
       frequency :0,
       scale: { start: .3, end: .2 },
     blendMode: 'ADD'
-      });     
+      });
     this.spEmitter.startFollow(this);
         this.addBoundsToBorder();
         killPlayer();
       }
-    }else 
+    }else
     {
       this.deathTimer++;
     }
@@ -1866,51 +1867,131 @@ class bomb extends Phaser.Physics.Arcade.Sprite {
     {
       border[get1DIndex(i,this.rect.left)]=2;
       border[get1DIndex(i,this.rect.right)]=2;
-    }    
+    }
     processCapture(true);
-    
+
   }
 
 }
 
-class enemySegment extends Phaser.Physics.Arcade.Sprite 
+class enemySegment extends Phaser.Physics.Arcade.Sprite
 {
   constructor(scene, x = 0, y = 0, texture = 'bomb') {
     super(scene, x, y, texture);
+    this.setDepth(playerLayer);
+    this.setDisplaySize(70,70);
 
     scene.add.existing(this);
     scene.events.on('update', this.update, this);
+    this.followX = this.x - 25;
+    this.followY = this.y + 25;
 
-   
- 
   }
-  
+
+  move(enemyDirectionX, enemyDirectionY)
+  {
+    this.x += enemyDirectionX;
+    this.y += enemyDirectionY;
+    this.followX += (this.x - this.followX) * Math.sqrt(2 / 1250);
+    this.followY += (this.y - this.followY) * Math.sqrt(2 / 1250);
+
+    if(isTemporary(Math.round(this.y),Math.round(this.x)))
+    {
+        killPlayer();
+    }
+
+    if(enemyDirectionX>0)
+    {
+      if(enemyDirectionY>0)
+      {
+        this.rotation=135*(Math.PI/180);
+
+      }else
+      {
+        this.rotation=45*(Math.PI/180);
+      }
+
+    }else
+    {
+      if(enemyDirectionY>0)
+      {
+        this.rotation=225*(Math.PI/180);
+      }else
+      {
+        this.rotation=315*(Math.PI/180);
+      }
+    }
+  }
 
   update() {
-  }   
-    
+
+  }
+
 
 }
 
 class enemyChain
 {
   constructor(scene, x = 0, y = 0, size =1) {
-    super(scene, x, y, texture)     
-    this.chain = []; 
-    let i=0;
-    scene.events.on('update', this.update, this);
-    for(i=0;i<size;i++) 
-    {
+    //super(scene, x, y, texture)
+    this.chain = [];
+    this.x = x;
+    this.y = y;
+    let i=1;
+    this.chain.push(new enemySegment(scene, x, y));
 
+    for (i = 1; i < size; i++) {
+      this.chain.push(new enemySegment(scene, this.chain[i - 1].followX, this.chain[i - 1].followY));
     }
- 
+
+    scene.events.on('update', this.update, this);
+
   }
 
   update()
   {
-    
-  }
+    for(i=0;i<enemySpeed;i++)
+    {
+      var newCol= this.chain[0].x+enemyDirectionX;
+      var newRow = this.chain[0].y+enemyDirectionY;
 
+        if(onBorder(newRow,newCol))
+        {
+            if((Math.random()*100)<=50)
+            {
+              enemyDirectionX=-enemyDirectionX;
+             }else
+             {
+             enemyDirectionY=-enemyDirectionY;
+             }
+        }else
+        {
+          this.chain[0].move(enemyDirectionX, enemyDirectionY);
+          for (let i = 1; i < this.chain.length; i++) {
+            let tempDirX = this.chain[i - 1].followX - this.chain[i].x;
+            let tempDirY = this.chain[i - 1].followY - this.chain[i].y;
+            let divisor = Math.sqrt(2 / (tempDirX * tempDirX + tempDirY * tempDirY));
+            tempDirX *= divisor;
+            tempDirY *= divisor;
+            this.chain[i].move(tempDirX, tempDirY);
+          }
+        }
+    }
+
+    if((Math.random()*100)<=1)
+    {
+        if((Math.random()*100)<=50)
+        {
+            enemyDirectionX=-enemyDirectionX;
+        }else
+        {
+            enemyDirectionY=-enemyDirectionY;
+        }
+    }
+
+    this.x = this.chain[0].x;
+    this.y = this.chain[0].y;
+  }
 }
 
 
