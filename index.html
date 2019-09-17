@@ -1876,10 +1876,15 @@ class bomb extends Phaser.Physics.Arcade.Sprite {
 class enemySegment extends Phaser.Physics.Arcade.Sprite 
 {
   constructor(scene, x = 0, y = 0, texture = 'bomb') {
-    super(scene, x, y, texture)
+    super(scene, x, y, texture);
+
+    scene.add.existing(this);
+    scene.events.on('update', this.update, this);
+
    
  
   }
+  
 
   update() {
   }   
@@ -1893,11 +1898,17 @@ class enemyChain
     super(scene, x, y, texture)     
     this.chain = []; 
     let i=0;
+    scene.events.on('update', this.update, this);
     for(i=0;i<size;i++) 
     {
-      
+
     }
  
+  }
+
+  update()
+  {
+    
   }
 
 }
