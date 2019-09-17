@@ -103,6 +103,7 @@
 
 
     var scoreText;
+    var percentText;
     var winText;
 
     var backTex;
@@ -235,8 +236,11 @@ function init()
         heart3.setDepth(UILayer);
 
 
-        scoreText = this.add.text(10, 5, '00', { font: '40px monospace', fill: '#ffffff' });
+        scoreText = this.add.text(10, 5, 'Score: 0', { font: '40px monospace', fill: '#ffffff' });
+        percentText = this.add.text(10, 55, 'Percentage: 0%', { font: '40px monospace', fill: '#ffffff' });
+
         scoreText.setDepth(UILayer);
+        percentText.setDepth(UILayer);
         //this.add.rectangle(0, 0, 100, 100, whiteColor.color);
         enemyWidth = enemy.width;
 
@@ -688,25 +692,25 @@ function handleMove()
         {
           player.rotation=0;
             newCol -= 1;
-            player.flipX=true;
+            player.flipX=false;
             goingLeft=true;
         }
         else if (cursors.right.isDown)
         {
           player.rotation=0;
             newCol += 1;
-            player.flipX=false;
+            player.flipX=true;
             goingLeft=false;
         }
         else if (cursors.up.isDown)
         {
-          if(goingLeft)
+          /*if(goingLeft)
           {
             player.rotation=Math.PI/2;
           }else
           {
             player.rotation=-Math.PI/2;
-          }
+          }*/
 
 
             newRow -= 1;
@@ -714,13 +718,13 @@ function handleMove()
         }
         else if (cursors.down.isDown)
         {
-          if(goingLeft)
+          /*if(goingLeft)
           {
             player.rotation=-Math.PI/2;
           }else
           {
             player.rotation=Math.PI/2;
-          }
+          }*/
 
 
             newRow += 1;
@@ -791,10 +795,11 @@ function handleMove()
                     {
                       scoreFactor = 1;
                     }
-                    drawMode = 0;
+
                     isDrawing = false;
 
                     processCapture();
+                    drawMode = 0;
                 }else if(!isTemporary(newRow,newCol))//player is still drawing move them along as long as they don't cross their own path
                 {
                     //THIS IS TEMPORARY LINE BREAKS THINGS
@@ -1313,7 +1318,16 @@ function checkUncover()
 
       if ((border[get1DIndex(recTop, recLeft)] != -1) && (border[get1DIndex(recTop, recRight)] != -1) && (border[get1DIndex(recBottom, recLeft)] != -1) && (border[get1DIndex(recBottom, recRight)] != -1))
       {
-        element.detected = true;
+        if (drawMode == 2)
+        {
+          console.log("boooooooooooooom");
+          element.explode();
+        }
+        else
+        {
+          console.log("mooooooooooooooob");
+          element.detected = true;
+        }
         //element.visible = false;
       }
     }
@@ -1447,11 +1461,8 @@ if(countsForPoints)
   remainingPixels = tempScore;
 }
 
-
-  // TODO: Check every bone
-  // TEMP: Check a single bone
-
-  scoreText.setText(score);
+  scoreText.setText('Score: ' + score);
+  percentText.setText('Percentage: ' + Math.round(100 - remainingPixels / (gameWidth * gameHeight) * 100) + '%');
 
  // console.log(percentage);
 
@@ -1722,7 +1733,7 @@ class fossil extends Phaser.Physics.Arcade.Sprite {
         this.detected = true;
         this.visible = false;
         score -= punishScore;
-        scoreText.setText(score);
+        scoreText.setText("Score: " + score);
         this.spEmitter.visible=false;
         this.coverSprite.setDepth(0);
       }
@@ -1933,6 +1944,22 @@ class bomb extends Phaser.Physics.Arcade.Sprite {
     }
     processCapture(true);
 
+  }
+
+  explode()
+  {
+    this.damaged = true;
+    this.visible = false;
+    this.spEmitter.visible=false;
+    this.spEmitter = this.spPart.createEmitter({
+  speed: 100,
+  frequency :0,
+  scale: { start: .3, end: .2 },
+blendMode: 'ADD'
+  });
+this.spEmitter.startFollow(this);
+    this.addBoundsToBorder();
+    killPlayer();
   }
 
 }
