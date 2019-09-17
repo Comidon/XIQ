@@ -57,7 +57,7 @@
 
     var enemy;
     var enemyWidth;
-    var enemySpeed=4;
+    var enemySpeed=3;
     var enemyDirectionX=1;
     var enemyDirectionY=1;
     var cursors;
@@ -98,8 +98,7 @@
     var numberOfBombs=3;
 
    var sparxs=[];
-   var numberOfSparx=3
-   ;
+   var numberOfSparx=0;
 
 
     var scoreText;
@@ -128,6 +127,8 @@
     var canvas;
     var fullscreen;
 
+    var segmentEnemy;
+    var enemyLength=3;
 
     // TO GO: in the pixel filler to update score according to conquered pixel spaces
     //
@@ -148,7 +149,9 @@ function init()
         this.load.image('green', 'assets/green.png');
         this.load.image('yellow', 'assets/yellow.png');
         this.load.image('blue', 'assets/blue.png');
-        this.load.image('enemy','assets/enemyHead.png');
+        this.load.image('enemyHead','assets/enemyHead.png');
+        this.load.image('enemyTail','assets/enemyTail.png');
+        this.load.image('enemyBody','assets/enemyBody.png');
         this.load.image('sparx','assets/sparx.png')
         this.load.image('heart', 'assets/heart.jpg');
         this.load.image('back','assets/back.png');
@@ -185,7 +188,12 @@ function init()
         let point =getRandomPointOnBorder();
         let newSparx = new sparx(this,point[0],point[1]);
         sparxs.push(newSparx);
-      }
+      }  
+
+
+      segmentEnemy = new enemyChain(this,config.width/2,config.height/2,enemyLength,enemySpeed);
+      
+
 
        whiteColor = new Phaser.Display.Color(100, 0, 0);
         whiteColor = new Phaser.Display.Color(100, 0, 0);
@@ -291,6 +299,7 @@ function init()
         fusePart.setDepth(particleLayer);
 
         emitter2.startFollow(enemy);
+        emitter2.visible=false;
 
         fuseEmitter.startFollow(fuse);
 
@@ -418,65 +427,66 @@ function updatePlayerParticles()
 
 function updateEnemy()
 {
+  segmentEnemy.update();
 
-    for(i=0;i<enemySpeed;i++)
-    {
-        var newCol= enemy.x+enemyDirectionX;
-        var newRow = enemy.y+enemyDirectionY;
-        if(onBorder(newRow,newCol))
-        {
-            if((Math.random()*100)<=50)
-            {
-              enemyDirectionX=-enemyDirectionX;
-             }else
-             {
-             enemyDirectionY=-enemyDirectionY;
-             }
-        }else
-        {
-            enemy.x=newCol;
-            enemy.y=newRow;
-        }
+    // for(i=0;i<enemySpeed;i++)
+    // {
+    //     var newCol= enemy.x+enemyDirectionX;
+    //     var newRow = enemy.y+enemyDirectionY;
+    //     if(onBorder(newRow,newCol))
+    //     {
+    //         if((Math.random()*100)<=50)
+    //         {
+    //           enemyDirectionX=-enemyDirectionX;
+    //          }else
+    //          {
+    //          enemyDirectionY=-enemyDirectionY;
+    //          }
+    //     }else
+    //     {
+    //         enemy.x=newCol;
+    //         enemy.y=newRow;
+    //     }
 
-        if(isTemporary(enemy.y,enemy.x))
-        {
-            killPlayer();
-        }
-    }
+    //     if(isTemporary(enemy.y,enemy.x))
+    //     {
+    //         killPlayer();
+    //     }
+    // }
 
-    if((Math.random()*100)<=1)
-    {
-        if((Math.random()*100)<=50)
-        {
-            enemyDirectionX=-enemyDirectionX;
-        }else
-        {
-            enemyDirectionY=-enemyDirectionY;
-        }
-    }
-    if(enemyDirectionX>0)
-    {
-      if(enemyDirectionY>0)
-      {
-        enemy.rotation=135*(Math.PI/180);
+    // if((Math.random()*100)<=1)
+    // {
+    //     if((Math.random()*100)<=50)
+    //     {
+    //         enemyDirectionX=-enemyDirectionX;
+    //     }else
+    //     {
+    //         enemyDirectionY=-enemyDirectionY;
+    //     }
+    // }
+    // if(enemyDirectionX>0)
+    // {
+    //   if(enemyDirectionY>0)
+    //   {
+    //     enemy.rotation=135*(Math.PI/180);
 
-      }else
-      {
-        enemy.rotation=45*(Math.PI/180);
-      }
+    //   }else
+    //   {
+    //     enemy.rotation=45*(Math.PI/180);
+    //   }
 
-    }else
-    {
-      if(enemyDirectionY>0)
-      {
-        enemy.rotation=225*(Math.PI/180);
-      }else
-      {
-        enemy.rotation=315*(Math.PI/180);
+    // }else
+    // {
+    //   if(enemyDirectionY>0)
+    //   {
+    //     enemy.rotation=225*(Math.PI/180);
+    //   }else
+    //   {
+    //     enemy.rotation=315*(Math.PI/180);
 
-      }
+    //   }
 
-    }
+    // }
 
 
 
@@ -1946,6 +1956,7 @@ class enemyChain
 
     scene.events.on('update', this.update, this);
 
+    }
   }
 
   update()
@@ -1994,9 +2005,63 @@ class enemyChain
   }
 }
 
+    if((Math.random()*100)<=1)
+    {
+        if((Math.random()*100)<=50)
+        {
+            this.DirectionX=-this.DirectionX;
+        }else
+        {
+            this.DirectionY=-this.DirectionY;
+        }
+    }
+    if(this.DirectionX>0)
+    {
+      if(this.DirectionY>0)
+      {
+        head.rotation=135*(Math.PI/180);
 
+      }else
+      {
+        head.rotation=45*(Math.PI/180);
+      }
 
-    </script>
+    }else
+    {
+      if(this.DirectionY>0)
+      {
+        head.rotation=225*(Math.PI/180);
+      }else
+      {
+        head.rotation=315*(Math.PI/180);
+
+      }
+
+    }
+
+    this.rotations.push(head.rotation);
+  }
+
+  moveBody()
+  {
+
+   for(i=1;i<this.chain.length;i++) 
+    {
+      let index =i*this.spacing+this.chain[i].index;
+      if(index<this.pathX.length)
+      {      
+        console.log("here");
+        this.chain[i].x= this.pathX[index];
+        this.chain[i].y= this.pathY[index];
+        this.chain[i].rotation = this.rotations[index];
+        this.chain[i].index=index;
+      }
+    }
+  }
+
+}
+
+  </script>
 </body>
 </div>
 </html>
