@@ -57,7 +57,7 @@
 
     var enemy;
     var enemyWidth;
-    var enemySpeed=4;
+    var enemySpeed=3;
     var enemyDirectionX=1;
     var enemyDirectionY=1;
     var cursors;
@@ -98,7 +98,7 @@
     var numberOfBombs=3;
 
    var sparxs=[];
-   var numberOfSparx=3
+   var numberOfSparx=0
    ;
 
 
@@ -128,6 +128,8 @@
     var canvas;
     var fullscreen;
 
+    var segmentEnemy;
+    var enemyLength=3;
 
     // TO GO: in the pixel filler to update score according to conquered pixel spaces
     //
@@ -148,7 +150,9 @@ function init()
         this.load.image('green', 'assets/green.png');
         this.load.image('yellow', 'assets/yellow.png');
         this.load.image('blue', 'assets/blue.png');
-        this.load.image('enemy','assets/enemyHead.png');
+        this.load.image('enemyHead','assets/enemyHead.png');
+        this.load.image('enemyTail','assets/enemyTail.png');
+        this.load.image('enemyBody','assets/enemyBody.png');
         this.load.image('sparx','assets/sparx.png')
         this.load.image('heart', 'assets/heart.jpg');
         this.load.image('back','assets/back.png');
@@ -185,7 +189,12 @@ function init()
         let point =getRandomPointOnBorder();
         let newSparx = new sparx(this,point[0],point[1]);
         sparxs.push(newSparx);
-      }
+      }  
+
+
+      segmentEnemy = new enemyChain(this,config.width/2,config.height/2,enemyLength,enemySpeed);
+      
+
 
        whiteColor = new Phaser.Display.Color(100, 0, 0);
         whiteColor = new Phaser.Display.Color(100, 0, 0);
@@ -199,8 +208,8 @@ function init()
         resetPlayerPosition();
        
 
-        enemy= this.add.sprite(config.width/2,config.height/2,'enemy');
-        enemy.setDepth(playerLayer);
+        enemy= this.add.sprite(config.width/2,config.height/2,'enemyBody');
+        enemy.setDepth(0);
         //enemy.alpha=0;
         //player.alpha=0;
 
@@ -291,6 +300,7 @@ function init()
         fusePart.setDepth(particleLayer);
 
         emitter2.startFollow(enemy);
+        emitter2.visible=false;
 
         fuseEmitter.startFollow(fuse);
 
@@ -396,7 +406,7 @@ function update ()
     updatePlayerParticles();
 
     handleMove();
-    updateEnemy();
+    //updateEnemy();
 }
 
 function updatePlayerParticles()
@@ -417,65 +427,66 @@ function updatePlayerParticles()
 
 function updateEnemy()
 {
+  segmentEnemy.update();
 
-    for(i=0;i<enemySpeed;i++)
-    {
-        var newCol= enemy.x+enemyDirectionX;
-        var newRow = enemy.y+enemyDirectionY;
-        if(onBorder(newRow,newCol))
-        {
-            if((Math.random()*100)<=50)
-            {
-              enemyDirectionX=-enemyDirectionX;
-             }else
-             {
-             enemyDirectionY=-enemyDirectionY;
-             }
-        }else
-        {
-            enemy.x=newCol;
-            enemy.y=newRow;
-        }
+    // for(i=0;i<enemySpeed;i++)
+    // {
+    //     var newCol= enemy.x+enemyDirectionX;
+    //     var newRow = enemy.y+enemyDirectionY;
+    //     if(onBorder(newRow,newCol))
+    //     {
+    //         if((Math.random()*100)<=50)
+    //         {
+    //           enemyDirectionX=-enemyDirectionX;
+    //          }else
+    //          {
+    //          enemyDirectionY=-enemyDirectionY;
+    //          }
+    //     }else
+    //     {
+    //         enemy.x=newCol;
+    //         enemy.y=newRow;
+    //     }
 
-        if(isTemporary(enemy.y,enemy.x))
-        {
-            killPlayer();
-        }
-    }
+    //     if(isTemporary(enemy.y,enemy.x))
+    //     {
+    //         killPlayer();
+    //     }
+    // }
 
-    if((Math.random()*100)<=1)
-    {
-        if((Math.random()*100)<=50)
-        {
-            enemyDirectionX=-enemyDirectionX;
-        }else
-        {
-            enemyDirectionY=-enemyDirectionY;
-        }
-    }
-    if(enemyDirectionX>0)
-    {
-      if(enemyDirectionY>0)
-      {
-        enemy.rotation=135*(Math.PI/180);
+    // if((Math.random()*100)<=1)
+    // {
+    //     if((Math.random()*100)<=50)
+    //     {
+    //         enemyDirectionX=-enemyDirectionX;
+    //     }else
+    //     {
+    //         enemyDirectionY=-enemyDirectionY;
+    //     }
+    // }
+    // if(enemyDirectionX>0)
+    // {
+    //   if(enemyDirectionY>0)
+    //   {
+    //     enemy.rotation=135*(Math.PI/180);
 
-      }else
-      {
-        enemy.rotation=45*(Math.PI/180);
-      }
+    //   }else
+    //   {
+    //     enemy.rotation=45*(Math.PI/180);
+    //   }
 
-    }else
-    {
-      if(enemyDirectionY>0)
-      {
-        enemy.rotation=225*(Math.PI/180);
-      }else
-      {
-        enemy.rotation=315*(Math.PI/180);
+    // }else
+    // {
+    //   if(enemyDirectionY>0)
+    //   {
+    //     enemy.rotation=225*(Math.PI/180);
+    //   }else
+    //   {
+    //     enemy.rotation=315*(Math.PI/180);
 
-      }
+    //   }
 
-    }
+    // }
 
 
 
@@ -1880,42 +1891,139 @@ class enemySegment extends Phaser.Physics.Arcade.Sprite
 
     scene.add.existing(this);
     scene.events.on('update', this.update, this);
-
-   
+    this.setDepth(playerLayer); 
+    this.index=0;
  
   }
   
 
   update() {
   }   
+  
     
 
 }
 
 class enemyChain
 {
-  constructor(scene, x = 0, y = 0, size =1) {
-    super(scene, x, y, texture)     
+  constructor(scene, x = 0, y = 0, size =2,speed) {   
+    this.speed=speed;         
+    this.length = size;
     this.chain = []; 
+    this.spacing=1;
     let i=0;
     scene.events.on('update', this.update, this);
-    for(i=0;i<size;i++) 
-    {
+    this.pathX = [];
+    this.pathY = [];
+    this.rotations = [];
+    this.DirectionX=1;
+    this.DirectionY=1;
 
+    this.chain.push(new enemySegment(_this,x,y,"enemyHead"))
+    for(i=1;i<this.length-1;i++) 
+    {
+      this.chain.push(new enemySegment(_this,x,y,"enemyBody"))
     }
+    this.chain.push(new enemySegment(_this,x,y,"enemyTail"))
  
   }
 
   update()
   {
-    
+   this.moveHead();
+   this.moveBody();
+  }
+
+  moveHead()
+  {
+    let head=this.chain[0];
+    for(i=0;i<this.speed;i++)
+    {
+        let newCol= head.x+this.DirectionX;
+        let newRow = head.y+this.DirectionY;
+        if(onBorder(newRow,newCol))
+        {
+            if((Math.random()*100)<=50)
+            {
+              this.DirectionX=-this.DirectionX;
+             }else
+             {
+             this.DirectionY=-this.DirectionY;
+             }
+        }else
+        {          
+          head.x=newCol;
+          head.y=newRow;
+          this.pathX.push(head.x);
+          this.pathY.push(head.y);
+        }
+      
+    }
+
+    if((Math.random()*100)<=1)
+    {
+        if((Math.random()*100)<=50)
+        {
+            this.DirectionX=-this.DirectionX;
+        }else
+        {
+            this.DirectionY=-this.DirectionY;
+        }
+    }
+    if(this.DirectionX>0)
+    {
+      if(this.DirectionY>0)
+      {
+        head.rotation=135*(Math.PI/180);
+
+      }else
+      {
+        head.rotation=45*(Math.PI/180);
+      }
+
+    }else
+    {
+      if(this.DirectionY>0)
+      {
+        head.rotation=225*(Math.PI/180);
+      }else
+      {
+        head.rotation=315*(Math.PI/180);
+
+      }
+
+    }
+
+    this.rotations.push(head.rotation);
+  }
+
+  moveBody()
+  {
+
+   for(i=1;i<this.chain.length;i++) 
+    {
+      //let index =i*this.spacing+this.chain[i].index;
+      let index = this.chain[i].index+1;
+      if(index <= this.pathX.length)
+      {
+        console.log("here");
+        this.chain[i].x= this.pathX[index];
+        this.chain[i].y= this.pathY[index];
+        this.chain[i].rotation = this.rotations[index];
+        this.chain[i].index=index;
+
+        this.chain[i].x= this.chain[0].x;
+        this.chain[i].y= this.chain[0].y;
+        this.chain[i].rotation = this.chain[0].rotation;
+        this.chain[i].index=index;
+      }
+      
+    }
   }
 
 }
 
-
-
-    </script>
+  </script>
 </body>
 </div>
 </html>
