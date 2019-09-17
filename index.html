@@ -40,7 +40,7 @@
 
 
     var xBorderShift=(config.width-gameWidth)/2;//how far in to shift the game board from the screen width
-    var yBorderShift=(config.height-gameHeight)/2;   
+    var yBorderShift=(config.height-gameHeight)/2;
 
     var xMin = xBorderShift;
     var xMax = config.width-xBorderShift;
@@ -60,8 +60,8 @@
     var gameOver = false;
     var input;
     var slowSpeed = 2;
-    var fastSpeed = 2 * slowSpeed;   
-    var border;    
+    var fastSpeed = 2 * slowSpeed;
+    var border;
     var drawMode = 0; //0: none 1:slow 2: fast
     var isDrawing = false;
     var playerIsMoving=false;
@@ -116,7 +116,7 @@
     var bonusScore = 1000000000;
     var remainingPixels = config.width * config.height;
 
-    var useFullscreen=true;
+    var useFullscreen=false;
     var canvas;
     var fullscreen;
 
@@ -153,7 +153,7 @@ function init()
 
     function create ()
     {
-      
+
       graphics = this.add.graphics({ fillStyle: { color: 0x0000aa } });
       initBoard();
 
@@ -221,12 +221,12 @@ function init()
 
         let scale=1.56;
         backTex = this.add.sprite(xBorderShift, yBorderShift, 'back').setOrigin(0,0);
-        
+
 
         backTex.setDisplaySize(backTex.width*scale,backTex.height*scale);
         backTex.setDepth(backLayer);
 
-        frontTex = this.add.sprite(xBorderShift, yBorderShift, 'front').setOrigin(0,0);        
+        frontTex = this.add.sprite(xBorderShift, yBorderShift, 'front').setOrigin(0,0);
         frontTex.setDisplaySize(frontTex.width*scale,frontTex.height*scale);
         frontTex.mask = new Phaser.Display.Masks.BitmapMask(this, graphics);
         frontTex.setDepth(frontLayer);
@@ -274,9 +274,9 @@ function init()
         // shadowSprite = this.add.sprite(0,0,"shadow");
         // shadowSprite.setDepth(shadowLayer);
         // shadowSprite.mask = new Phaser.Display.Masks.BitmapMask(this, graphics);
-       
+
         floodFill(enemy.x,enemy.y);
-       
+
     //  if (justStarted == true) {
 
     //  }
@@ -294,8 +294,8 @@ function requestFullscreen()
     canvas[fullscreen.request]();
 }
 
-function randomIntFromInterval(min, max) 
-{ // min and max included 
+function randomIntFromInterval(min, max)
+{ // min and max included
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
@@ -333,6 +333,8 @@ function getRandomPointOnBorder()
 
 function update ()
 {
+  //console.log(player.x);
+  //console.log(player.y);
     if (Phaser.Input.Keyboard.JustDown(enterButton) && justStarted == true) {
         justStarted = false;
         title.visible = false;
@@ -413,7 +415,7 @@ function updateEnemy()
       }else
       {
         enemy.rotation=315*(Math.PI/180);
-        
+
       }
 
     }
@@ -465,7 +467,7 @@ function initBoard()
         {
            // console.log(get1DIndex(row,col));
             border[get1DIndex(row, col)] = 0;
-            
+
         }
     }
 
@@ -658,7 +660,7 @@ function handleMove()
                     }
                     drawMode = 0;
                     isDrawing = false;
-                    
+
                     processCapture();
                 }else if(!isTemporary(newRow,newCol))//player is still drawing move them along as long as they don't cross their own path
                 {
@@ -752,16 +754,16 @@ function processCapture()//player has completed a square, process it
 
     graphics.clear();
     shadowGraphics.clear();
-    console.log("Done Drawing!");    
-    addAllTemporaryBorders();    
+    console.log("Done Drawing!");
+    addAllTemporaryBorders();
     let startPoint = checkWhichPointToFill();
-    floodFill(startPoint[0], startPoint[1]);    
+    floodFill(startPoint[0], startPoint[1]);
     recalcBorders();
    //printBorders();
 }
 function recalcBorders()
 {
-   
+
     let borderCopy = border.slice(0);//backup the border
     console.log(border[get1DIndex(yMin+1,xMin+1)]);
 
@@ -785,15 +787,15 @@ function recalcBorders()
         let newY = newBorders.pop();
         let newX = newBorders.pop();
         border[get1DIndex(newY,newX)]=1;
-    }   
+    }
 
 }
 
 function resetEnemyArea()
 {
-    for(col = yMin; col < yMax; col++)
+    for(col = xMin; col < xMax; col++)
     {
-        for(row = xMin;row < xMax; row++)
+        for(row = yMin;row < yMax; row++)
         {
           if (border[get1DIndex(row,col)] != 1)
           {
@@ -808,12 +810,12 @@ function resetEnemyArea()
 function borderFloodFill(data,row,col)
 {
   console.log("flood start (border)");
- 
+
     let replaceVal=3;
 
     console.log(data[get1DIndex(row,col)]);
     data[get1DIndex(row,col)]=replaceVal;
-  
+
     let Qx=[];
     let Qy=[];
 
@@ -825,17 +827,17 @@ function borderFloodFill(data,row,col)
 
     while(!Qx.length==0 && !Qy.length==0)
     {
-      
+
         let nx = Qx.shift();
         let ny = Qy.shift();
-        
+
 
         let north = ny-1;
         let south = ny+1;
         let east = nx+1;
         let west = nx-1;
-        
-        
+
+
         if(data[get1DIndex(north,nx)]==1)//if a neighbor is a border it is part of the new borders
         {
             newBorders.push(nx);
@@ -910,7 +912,7 @@ function borderFloodFill(data,row,col)
         }
     }
     console.log("flood stop (border)");
-    
+
     return newBorders;
 }
 
@@ -1147,17 +1149,16 @@ function floodFill(x, y)
 
   tempScore++;
 
-console.log("Enter loop");
   while (queue.length > 0)
   {
     if(queue.length>count)
     {
       count = queue.length;
     }
-    
+
    // console.log("loop");
     let tempX = queue.shift();
-    let tempY = queue.shift();   
+    let tempY = queue.shift();
 
     if (!onBorder(tempY + 1, tempX) && set[get1DIndex(tempY + 1, tempX)] != 1)
     {
@@ -1308,7 +1309,7 @@ console.log("---------"+count+" Iterations----------");
 
   //while (!((startingX == runningX) && (startingY == runningY)))
   while (check)
-  {   
+  {
     if (checkingDir == 0)
     {
       if (shapeBorderSet[get1DIndex(runningY, runningX + 1)] != 1)
@@ -1541,11 +1542,11 @@ class sparx extends Phaser.Physics.Arcade.Sprite {
   }
 
   update() {
-    
+
 
 this.count+=1;
 if(this.count<=this.speedSkip)
-{  
+{
   //console.log("skip");
   return;
 }
@@ -1632,7 +1633,7 @@ this.count=0;
         }
 
     }
-    
+
 
   }
 
