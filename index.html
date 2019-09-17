@@ -113,10 +113,11 @@
     var count = 0;
     var title; //temp title
     var justStarted = true;
-    var bonusScore = 1000000000;
+    var bonusScore = 10000;
+    var punishScore = 20000;
     var remainingPixels = config.width * config.height;
 
-    var useFullscreen=false;
+    var useFullscreen=true;
     var canvas;
     var fullscreen;
 
@@ -1081,6 +1082,20 @@ function killPlayer()
     }
 }
 
+function checkAllBonesCollected()
+{
+  let temp = true;
+  bones.forEach(function(element)
+  {
+    if (!element.detected)
+    {
+      temp = false;
+    }
+  });
+
+  return temp;
+}
+
 function checkUncover()
 {
   bones.forEach(function(element)
@@ -1248,7 +1263,6 @@ console.log("---------"+count+" Iterations----------");
   // TEMP: Check a single bone
 
   scoreText.setText(score);
-  percentage = percentage + tempScore;
 
  // console.log(percentage);
 
@@ -1257,9 +1271,12 @@ console.log("---------"+count+" Iterations----------");
   //console.log(config.width * config.height);
 
   // TEMPORARY: win text
-  if (percentage / (config.width * config.height) > 0.75)
+  if (remainingPixels / (gameWidth * gameHeight) < 0.25)
   {
-   // _this.add.text(175, 230, 'You Win!', { font: '40px monospace', fill: '#ffffff' });
+    if (checkAllBonesCollected())
+    {
+      _this.add.text(175, 230, 'You Win!', { font: '40px monospace', fill: '#ffffff' });
+    }
   }
 
   var checkingDir;
@@ -1504,7 +1521,10 @@ class fossil extends Phaser.Physics.Arcade.Sprite {
       if (player.x > this.rect.left && player.x < this.rect.right && player.y > this.rect.top && player.y < this.rect.bottom && drawMode == 2)
       {
         this.damaged = true;
+        this.detected = true;
         this.visible = false;
+        score -= punishScore;
+        scoreText.setText(score);
       }
     }
   }
@@ -1647,8 +1667,8 @@ class bomb extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this)  ;
     this.detected = false;
     this.damaged = false;
-    this.rect = this.getBounds();
     this.setDisplaySize(70,70);
+    this.rect = this.getBounds();
 
     scene.events.on('update', this.update, this);
     var spPart = scene.add.particles('yellow');
