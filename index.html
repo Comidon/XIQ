@@ -119,6 +119,8 @@
     var shadowWidth=10;
     var count = 0;
     var title; //temp title
+    var winScreen;
+    var loseScreen;
     var justStarted = true;
     var bonusScore = 10000;
     var punishScore = 20000;
@@ -128,8 +130,11 @@
     var canvas;
     var fullscreen;
 
+    var win = false;
+    var lose = false;
+
     //var segmentEnemy;
-  
+
 
     // TO GO: in the pixel filler to update score according to conquered pixel spaces
     //
@@ -162,6 +167,8 @@ function init()
         this.load.image('bone3','assets/bone3.png');
         this.load.image('title', 'assets/Title.png'); //temp title
         this.load.image('bomb','assets/bomb.png');
+        this.load.image('win','assets/win.png');
+        this.load.image('lose','assets/lose.png');
     }
 
     function create ()
@@ -237,6 +244,12 @@ function init()
         shadowGraphics.setDepth(shadowLayer);
         title = this.add.sprite(0, 0, 'title').setOrigin(0,0);
         title.setDepth(UILayer);
+        winScreen = this.add.sprite(0, 0, 'win').setOrigin(0,0);
+        winScreen.setDepth(UILayer);
+        loseScreen = this.add.sprite(0, 0, 'lose').setOrigin(0,0);
+        loseScreen.setDepth(UILayer);
+        winScreen.visible = false;
+        loseScreen.visible = false;
 
         //  The score
         //scoreText.sendToFront();
@@ -379,11 +392,31 @@ function update ()
 {
   //console.log(player.x);
   //console.log(player.y);
-    if (Phaser.Input.Keyboard.JustDown(enterButton) && justStarted == true) {
+    if (justStarted == true && Phaser.Input.Keyboard.JustDown(enterButton)) {
         justStarted = false;
         title.visible = false;
         console.log("Entered");
         gameHasStarted=true;
+    }
+
+    if (win)
+    {
+      if (Phaser.Input.Keyboard.JustDown(enterButton))
+      {
+        location.reload();
+      }
+      return;
+    }
+
+    if (lose)
+    {
+      console.log("You lose");
+      if (Phaser.Input.Keyboard.JustDown(enterButton))
+      {
+        location.reload();
+        console.log("downdowndown");
+      }
+      return;
     }
 
 
@@ -393,7 +426,9 @@ function update ()
     }
 
     if (count == 3) {
-      location.reload();
+      loseScreen.visible = true;
+      lose = true;
+      //location.reload();
       count = 0;
     }
 
@@ -1422,7 +1457,9 @@ if(countsForPoints)
   {
     if (checkAllBonesCollected())
     {
-      _this.add.text(175, 230, 'You Win!', { font: '40px monospace', fill: '#ffffff' });
+      winScreen.visible = true;
+      win = true;
+      //_this.add.text(175, 230, 'You Win!', { font: '40px monospace', fill: '#ffffff' });
     }
   }
 
