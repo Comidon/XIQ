@@ -122,7 +122,7 @@
     var justStarted = true;
     var bonusScore = 10000;
     var punishScore = 20000;
-    var remainingPixels = config.width * config.height;
+    var remainingPixels = gameWidth* gameHeight;
 
     var useFullscreen=true;
     var canvas;
@@ -332,8 +332,15 @@ function getRandomPointOnBorder()
   letx=0;
   lety=0;
   let count=0;
-  var dir=1;
+  let dir=1;  
 
+while(!found)
+{
+  count++;
+  if(count>15)
+  {
+    break;
+  }
   if(Math.random()*100>=50)
   {
     dir=-1;
@@ -352,9 +359,9 @@ function getRandomPointOnBorder()
           return [col,row];
         }
       }
-
-
   }
+}
+  
   return [xBorderShift,yBorderShift];
 }
 
