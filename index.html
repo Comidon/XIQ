@@ -1886,33 +1886,34 @@ class bomb extends Phaser.Physics.Arcade.Sprite {
 
 class enemySegment extends Phaser.Physics.Arcade.Sprite
 {
-  constructor(scene, x = 0, y = 0, texture = 'bomb') {
+  constructor(scene, x = 0, y = 0, texture = '') {
     super(scene, x, y, texture);
     this.setDepth(playerLayer);
     this.setDisplaySize(70,70);
+    this.spacing =50;
 
     scene.add.existing(this);
     scene.events.on('update', this.update, this);
-    this.followX = this.x - 25;
-    this.followY = this.y + 25;
+    this.followX = this.x - this.spacing;
+    this.followY = this.y + this.spacing;
 
   }
 
-  move(enemyDirectionX, enemyDirectionY)
+  move(followDirectionX, followDirectionY)
   {
-    this.x += enemyDirectionX;
-    this.y += enemyDirectionY;
-    this.followX += (this.x - this.followX) * Math.sqrt(2 / 1250);
-    this.followY += (this.y - this.followY) * Math.sqrt(2 / 1250);
+    this.x += followDirectionX;
+    this.y += followDirectionY;
+    this.followX += (this.x - this.followX) * Math.sqrt(2 / (this.spacing*this.spacing*2));
+    this.followY += (this.y - this.followY) * Math.sqrt(2 / (this.spacing*this.spacing*2));
 
     if(isTemporary(Math.round(this.y),Math.round(this.x)))
     {
         killPlayer();
     }
 
-    if(enemyDirectionX>0)
+    if(followDirectionX>0)
     {
-      if(enemyDirectionY>0)
+      if(followDirectionY>0)
       {
         this.rotation=135*(Math.PI/180);
 
@@ -1923,7 +1924,7 @@ class enemySegment extends Phaser.Physics.Arcade.Sprite
 
     }else
     {
-      if(enemyDirectionY>0)
+      if(followDirectionY>0)
       {
         this.rotation=225*(Math.PI/180);
       }else
@@ -1948,11 +1949,12 @@ class enemyChain
     this.x = x;
     this.y = y;
     let i=1;
-    this.chain.push(new enemySegment(scene, x, y));
+    this.chain.push(new enemySegment(scene, x, y,"enemyHead"));
 
-    for (i = 1; i < size; i++) {
-      this.chain.push(new enemySegment(scene, this.chain[i - 1].followX, this.chain[i - 1].followY));
+    for (i = 1; i < size-1; i++) {
+      this.chain.push(new enemySegment(scene, this.chain[i - 1].followX, this.chain[i - 1].followY,"enemyBody"));
     }
+    this.chain.push(new enemySegment(scene, this.chain[size-2 - 1].followX, this.chain[size-2 - 1].followY,"enemyTail"));
 
     scene.events.on('update', this.update, this);
 
