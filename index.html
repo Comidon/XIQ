@@ -98,8 +98,7 @@
     var numberOfBombs=3;
 
    var sparxs=[];
-   var numberOfSparx=0
-   ;
+   var numberOfSparx=0;
 
 
     var scoreText;
@@ -1893,6 +1892,17 @@ class enemySegment extends Phaser.Physics.Arcade.Sprite
     scene.events.on('update', this.update, this);
     this.setDepth(playerLayer); 
     this.index=0;
+
+    this.spPart = scene.add.particles('yellow');
+
+this.spEmitter = this.spPart.createEmitter({
+  speed: 50,
+  frequency :0,
+  scale: { start: .08, end: .02 },
+blendMode: 'ADD'
+});
+this.spPart.setDepth(particleLayer);
+this.spEmitter.startFollow(this);
  
   }
   
@@ -1953,11 +1963,10 @@ class enemyChain
         }else
         {          
           head.x=newCol;
-          head.y=newRow;
-          this.pathX.push(head.x);
-          this.pathY.push(head.y);
+          head.y=newRow;         
         }
-      
+        this.pathX.push(head.x);
+        this.pathY.push(head.y);
     }
 
     if((Math.random()*100)<=1)
@@ -2002,22 +2011,15 @@ class enemyChain
 
    for(i=1;i<this.chain.length;i++) 
     {
-      //let index =i*this.spacing+this.chain[i].index;
-      let index = this.chain[i].index+1;
-      if(index <= this.pathX.length)
-      {
+      let index =i*this.spacing+this.chain[i].index;
+      if(index<this.pathX.length)
+      {      
         console.log("here");
         this.chain[i].x= this.pathX[index];
         this.chain[i].y= this.pathY[index];
         this.chain[i].rotation = this.rotations[index];
         this.chain[i].index=index;
-
-        this.chain[i].x= this.chain[0].x;
-        this.chain[i].y= this.chain[0].y;
-        this.chain[i].rotation = this.chain[0].rotation;
-        this.chain[i].index=index;
       }
-      
     }
   }
 
