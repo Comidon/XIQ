@@ -99,7 +99,7 @@
     var numberOfBombs=3;
 
    var sparxs=[];
-   var numberOfSparx=0;
+   var numberOfSparx=3;
 
 
     var scoreText;
@@ -291,7 +291,8 @@ function init()
 
         var redParticles = this.add.particles('red');
            redEmitter = redParticles.createEmitter({
-            speed: 50,
+            speed: 30,
+            frequency:50,
             scale: { start: .2, end: .02 },
             blendMode: 'ADD'
         });
