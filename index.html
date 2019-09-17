@@ -57,7 +57,7 @@
 
     var enemy;
     var enemyWidth;
-    var enemySpeed=3;
+    var enemySpeed=5;
     var enemyLength=10;
     var enemyDirectionX=1;
     var enemyDirectionY=1;
@@ -115,6 +115,7 @@
     var backLayer=1;
     var shadowLayer=3;
     var frontLayer=4;
+    var bombLayer = 5
 
     var shadowWidth=10;
     var count = 0;
@@ -165,8 +166,11 @@ function init()
         this.load.image('bone1','assets/bone1.png');
         this.load.image('bone2','assets/bone2.png');
         this.load.image('bone3','assets/bone3.png');
+        this.load.image('bone1Buried','assets/bone1_buried.png');
+        this.load.image('bone2Buried','assets/bone2_buried.png');
+        this.load.image('bone3Buried','assets/bone3_buried.png');
         this.load.image('title', 'assets/Title.png'); //temp title
-        this.load.image('bomb','assets/bomb.png');
+        this.load.image('bomb','assets/bomb2.png');
         this.load.image('win','assets/win.png');
         this.load.image('lose','assets/lose.png');
     }
@@ -1290,6 +1294,9 @@ function checkUncover()
       {
         score += bonusScore;
         element.detected = true;
+        element.coverSprite.visible=false;
+        element.spEmitter.visible=true;
+
       }
     }
   });
@@ -1668,18 +1675,24 @@ class fossil extends Phaser.Physics.Arcade.Sprite {
 
   constructor(scene, x = 0, y = 0, texture = 'bone') {
     var chance = Math.random()*100;
+
     if(chance<=33)
     {
       texture="bone1";
+      super(scene, x, y, texture)
+      this.coverSprite =_this.add.sprite(x, y, 'bone1Buried');
     }else if(chance<=66)
     {
       texture = "bone2";
+      super(scene, x, y, texture)
+      this.coverSprite =_this.add.sprite(x, y, 'bone2Buried');
     }else{
       texture = "bone3";
+      super(scene, x, y, texture)
+      this.coverSprite =_this.add.sprite(x, y, 'bone3Buried');
     }
 
-
-    super(scene, x, y, texture)
+    this.coverSprite.setDepth(playerLayer);
     this.setDepth(fossilLayer);
     scene.add.existing(this)  ;
     this.detected = false;
@@ -1691,12 +1704,13 @@ class fossil extends Phaser.Physics.Arcade.Sprite {
 
     this.spEmitter = spPart.createEmitter({
       speed: 50,
-      frequency :450,
+      frequency :300,
       scale: { start: .08, end: .02 },
     blendMode: 'ADD'
 });
   spPart.setDepth(particleLayer);
   this.spEmitter.startFollow(this);
+  this.spEmitter.visible=false;
   }
 
   update() {
@@ -1710,6 +1724,7 @@ class fossil extends Phaser.Physics.Arcade.Sprite {
         score -= punishScore;
         scoreText.setText(score);
         this.spEmitter.visible=false;
+        this.coverSprite.setDepth(0);
       }
     }
   }
@@ -1848,7 +1863,7 @@ class bomb extends Phaser.Physics.Arcade.Sprite {
 
   constructor(scene, x = 0, y = 0, texture = 'bomb') {
     super(scene, x, y, texture)
-    this.setDepth(fossilLayer);
+    this.setDepth(bombLayer);
     scene.add.existing(this)  ;
     this.detected = false;
     this.damaged = false;
@@ -1859,12 +1874,12 @@ class bomb extends Phaser.Physics.Arcade.Sprite {
     this.hidden=false;
 
     scene.events.on('update', this.update, this);
-    this.spPart = scene.add.particles('yellow');
+    this.spPart = scene.add.particles('red');
 
     this.spEmitter = this.spPart.createEmitter({
       speed: 50,
-      frequency :450,
-      scale: { start: .08, end: .02 },
+      frequency :300,
+      scale: { start: .3, end: .02 },
     blendMode: 'ADD'
 });
   this.spPart.setDepth(particleLayer);
@@ -2064,7 +2079,7 @@ class enemyChain
         }
     }
 
-    if((Math.random()*100)<=1)
+    if((Math.random()*100)<=3)
     {
         if((Math.random()*100)<=50)
         {
