@@ -188,11 +188,11 @@ function init()
         let point =getRandomPointOnBorder();
         let newSparx = new sparx(this,point[0],point[1]);
         sparxs.push(newSparx);
-      }  
+      }
 
 
       //segmentEnemy = new enemyChain(this,config.width/2,config.height/2,enemyLength,enemySpeed);
-      
+
 
 
        whiteColor = new Phaser.Display.Color(100, 0, 0);
@@ -1911,9 +1911,44 @@ class enemySegment extends Phaser.Physics.Arcade.Sprite
         killPlayer();
     }
 
-    if(followDirectionX>0)
+    if(followDirectionX > 0)
     {
-      if(followDirectionY>0)
+      if(followDirectionY > 0)
+      {
+        this.rotation=135*(Math.PI/180);
+
+      }else if(followDirectionY < 0)
+      {
+        this.rotation=45*(Math.PI/180);
+      }
+
+    }else if(followDirectionX < 0)
+    {
+      if(followDirectionY > 0)
+      {
+        this.rotation=225*(Math.PI/180);
+      }else if(followDirectionY < 0)
+      {
+        this.rotation=315*(Math.PI/180);
+      }
+    }
+  }
+
+  moveTowards(followDirectionX, followDirectionY, parentX, parentY)
+  {
+    this.x += followDirectionX;
+    this.y += followDirectionY;
+    this.followX += (this.x - this.followX) * Math.sqrt(2 / (this.spacing*this.spacing*2));
+    this.followY += (this.y - this.followY) * Math.sqrt(2 / (this.spacing*this.spacing*2));
+
+    if(isTemporary(Math.round(this.y),Math.round(this.x)))
+    {
+        killPlayer();
+    }
+
+    if(parentX - this.x > 0)
+    {
+      if(parentY - this.y > 0)
       {
         this.rotation=135*(Math.PI/180);
 
@@ -1924,7 +1959,7 @@ class enemySegment extends Phaser.Physics.Arcade.Sprite
 
     }else
     {
-      if(followDirectionY>0)
+      if(parentY - this.y > 0)
       {
         this.rotation=225*(Math.PI/180);
       }else
@@ -1959,7 +1994,7 @@ class enemyChain
     scene.events.on('update', this.update, this);
 
     }
-  
+
 
   update()
   {
@@ -1986,7 +2021,7 @@ class enemyChain
             let divisor = Math.sqrt(2 / (tempDirX * tempDirX + tempDirY * tempDirY));
             tempDirX *= divisor;
             tempDirY *= divisor;
-            this.chain[i].move(tempDirX, tempDirY);
+            this.chain[i].moveTowards(tempDirX, tempDirY, this.chain[i - 1].x, this.chain[i - 1].y);
           }
         }
     }
@@ -2007,8 +2042,8 @@ class enemyChain
   }
 }
 
-  
- 
+
+
 
 
   </script>
