@@ -34,6 +34,8 @@
 
     var game = new Phaser.Game(config);
 
+    var gameHasStarted =false;
+
     var gameWidth = 800;
     var gameHeight = 800;
 
@@ -96,7 +98,8 @@
     var numberOfBombs=3;
 
    var sparxs=[];
-   var numberOfSparx=3;
+   var numberOfSparx=3
+   ;
 
 
     var scoreText;
@@ -223,17 +226,17 @@ function init()
 
         shadowGraphics = this.add.graphics({ fillStyle: { color: 0x000000, alpha: 0.3 } });
         shadowGraphics.setDepth(shadowLayer);
-        title = this.add.sprite(330, 390, 'title');
+        title = this.add.sprite(0, 0, 'title').setOrigin(0,0);
         title.setDepth(UILayer);
 
         //  The score
         //scoreText.sendToFront();
 
         let scale=1.56;
-        backTex = this.add.sprite(xBorderShift, yBorderShift, 'back').setOrigin(0,0);
+        backTex = this.add.sprite(0, 0, 'back').setOrigin(0,0);
 
 
-        backTex.setDisplaySize(backTex.width*scale,backTex.height*scale);
+        backTex.setDisplaySize(config.width,config.height);
         backTex.setDepth(backLayer);
 
         frontTex = this.add.sprite(xBorderShift, yBorderShift, 'front').setOrigin(0,0);
@@ -363,7 +366,15 @@ function update ()
         justStarted = false;
         title.visible = false;
         console.log("Entered");
+        gameHasStarted=true;
     }
+
+
+    if(!gameHasStarted)
+    {
+      return;
+    }
+
     if (count == 3) {
       location.reload();
       count = 0;
@@ -1819,7 +1830,7 @@ class bomb extends Phaser.Physics.Arcade.Sprite {
     blendMode: 'ADD'
       });     
     this.spEmitter.startFollow(this);
-        //this.addBoundsToBorder();
+        this.addBoundsToBorder();
         killPlayer();
       }
     }else 
@@ -1835,7 +1846,7 @@ class bomb extends Phaser.Physics.Arcade.Sprite {
 
   addBoundsToBorder()
   {
-    removeAllTemporaryBorders();
+    //removeAllTemporaryBorders();
     let i=0;
     for(i=this.rect.left;i<=this.rect.right;i++)
     {
