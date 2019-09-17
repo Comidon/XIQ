@@ -55,7 +55,7 @@
 
     var enemy;
     var enemyWidth;
-    var enemySpeed=3;
+    var enemySpeed=0;
     var enemyDirectionX=1;
     var enemyDirectionY=1;
     var cursors;
@@ -92,7 +92,7 @@
 
     var bones=[];
     var bombs=[];
-    var numberOfBones=6;
+    var numberOfBones=0;
     var numberOfBombs=3;
 
    var sparxs=[];
@@ -193,6 +193,7 @@ function init()
 
         player = this.add.sprite(xBorderShift, yBorderShift, 'player');
         player.setDepth(playerLayer);
+        resetPlayerPosition();
        
 
         enemy= this.add.sprite(config.width/2,config.height/2,'enemy');
@@ -812,9 +813,26 @@ function addAllTemporaryBorders()
     lineGraphics.clear();
 }
 
-function processCapture()//player has completed a square, process it
+function removeAllTemporaryBorders()
 {
+  for(col = xMin; col <= xMax; col++)
+    {
+        for(row = yMin;row <= yMax; row++)
+        {
+            //console.log(get1DIndex(row,col));
+            if(border[get1DIndex(row, col)] == 2)
+            {
+                border[get1DIndex(row, col)] = 0;
+            }
+        }
+    }
+    lineGraphics.clear();
+}
 
+function processCapture(bomb=false)//player has completed a square, process it
+{
+if(!bomb)
+{
     graphics.clear();
     shadowGraphics.clear();
     console.log("Done Drawing!");
@@ -823,6 +841,16 @@ function processCapture()//player has completed a square, process it
     floodFill(startPoint[0], startPoint[1]);
     recalcBorders();
    //printBorders();
+}else
+{  
+    graphics.clear();
+    shadowGraphics.clear();    
+    addAllTemporaryBorders();   
+    floodFill(enemy.x,enemy.y);
+    recalcBorders();
+   
+}
+   
 }
 function recalcBorders()
 {
@@ -1130,18 +1158,41 @@ function killPlayer()
       player.x = player.x;
       player.y = player.y;
       count++; // lives used
+      resetPlayerPosition();
+      removeAllTemporaryBorders();
     } else if (count == 1) {
       heart2.visible = false;
       player.x = player.x;
       player.y = player.y;
       count++;
+      resetPlayerPosition();
+      removeAllTemporaryBorders();
     } else if (count == 2) {
       count++;
       heart3.visible = false;
       player.x=-999;
       player.y=-999;
       enemySpeed=0;
+      removeAllTemporaryBorders();
     }
+}
+
+function resetPlayerPosition()
+{
+  drawMode=0;
+  isDrawing=false;
+  if(border[get1DIndex(yMin,gameWidth/2 + xMin)]==1)
+  {
+    player.x=gameWidth/2 + xMin;
+    player.y=yMin;
+  }else
+  {
+    let point = getRandomPointOnBorder();
+    player.x=point[0];
+    player.y=point[1];
+  }
+  
+
 }
 
 function checkAllBonesCollected()
@@ -1197,7 +1248,7 @@ function checkUncover()
     });
 }
 
-function floodFill(x, y)
+function floodFill(x, y, countsForPoints=true)
 {
   console.log("flood start");
   let count=0;
@@ -1318,8 +1369,12 @@ console.log("End loop");
 console.log("---------"+count+" Iterations----------");
   checkUncover();
 
+if(countsForPoints)
+{
   score += Math.round(scoreFactor * (remainingPixels - tempScore) / 100);
   remainingPixels = tempScore;
+}
+
 
   // TODO: Check every bone
   // TEMP: Check a single bone
@@ -1731,18 +1786,21 @@ class bomb extends Phaser.Physics.Arcade.Sprite {
     this.damaged = false;
     this.setDisplaySize(70,70);
     this.rect = this.getBounds();
+    this.deathTimer=0;
+    this.explodeTime=100;
+    this.hidden=false;
 
     scene.events.on('update', this.update, this);
-    var spPart = scene.add.particles('yellow');
+    this.spPart = scene.add.particles('yellow');
 
-    var spEmitter = spPart.createEmitter({
+    this.spEmitter = this.spPart.createEmitter({
       speed: 50,
       frequency :450,
       scale: { start: .08, end: .02 },
     blendMode: 'ADD'
 });
-  spPart.setDepth(particleLayer);
-  spEmitter.startFollow(this);
+  this.spPart.setDepth(particleLayer);
+  this.spEmitter.startFollow(this);
 
   }
 
@@ -1752,11 +1810,48 @@ class bomb extends Phaser.Physics.Arcade.Sprite {
       if (player.x > this.rect.left && player.x < this.rect.right && player.y > this.rect.top && player.y < this.rect.bottom && drawMode == 2)
       {
         this.damaged = true;
-        this.visible = false;
+        this.visible = false;  
+        this.spEmitter.visible=false;
+        this.spEmitter = this.spPart.createEmitter({
+      speed: 100,
+      frequency :0,
+      scale: { start: .3, end: .2 },
+    blendMode: 'ADD'
+      });     
+    this.spEmitter.startFollow(this);
+        //this.addBoundsToBorder();
         killPlayer();
       }
+    }else 
+    {
+      this.deathTimer++;
+    }
+
+    if(this.deathTimer>=this.explodeTime && !this.hidden)
+    {
+      this.spEmitter.visible=false;
     }
   }
+
+  addBoundsToBorder()
+  {
+    removeAllTemporaryBorders();
+    let i=0;
+    for(i=this.rect.left;i<=this.rect.right;i++)
+    {
+      border[get1DIndex(this.rect.top,i)]=2;
+      border[get1DIndex(this.rect.bottom,i)]=2;
+    }
+
+    for(i=this.rect.top;i<=this.rect.bottom;i++)
+    {
+      border[get1DIndex(i,this.rect.left)]=2;
+      border[get1DIndex(i,this.rect.right)]=2;
+    }    
+    processCapture(true);
+    
+  }
+
 }
 
     </script>
