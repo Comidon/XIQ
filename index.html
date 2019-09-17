@@ -148,7 +148,7 @@ function init()
         this.load.image('green', 'assets/green.png');
         this.load.image('yellow', 'assets/yellow.png');
         this.load.image('blue', 'assets/blue.png');
-        this.load.image('enemy','assets/enemy.png');
+        this.load.image('enemy','assets/enemyHead.png');
         this.load.image('sparx','assets/sparx.png')
         this.load.image('heart', 'assets/heart.jpg');
         this.load.image('back','assets/back.png');
@@ -1872,6 +1872,37 @@ class bomb extends Phaser.Physics.Arcade.Sprite {
   }
 
 }
+
+class enemySegment extends Phaser.Physics.Arcade.Sprite 
+{
+  constructor(scene, x = 0, y = 0, texture = 'bomb') {
+    super(scene, x, y, texture)
+   
+ 
+  }
+
+  update() {
+  }   
+    
+
+}
+
+class enemyChain
+{
+  constructor(scene, x = 0, y = 0, size =1) {
+    super(scene, x, y, texture)     
+    this.chain = []; 
+    let i=0;
+    for(i=0;i<size;i++) 
+    {
+      
+    }
+ 
+  }
+
+}
+
+
 
     </script>
 </body>
