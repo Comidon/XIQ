@@ -134,6 +134,8 @@
 
     var win = false;
     var lose = false;
+    var soundEffects;
+    var music;
 
     //var segmentEnemy;
 
@@ -174,6 +176,8 @@ function init()
         this.load.image('bomb','assets/bomb2.png');
         this.load.image('win','assets/win.png');
         this.load.image('lose','assets/lose.png');
+        this.load.audio('music', 'assets/music.mp3');
+        this.load.audio('boom', 'assets/boom.mp3');
     }
 
     function create ()
@@ -182,7 +186,15 @@ function init()
       graphics = this.add.graphics({ fillStyle: { color: 0x0000aa } });
       initBoard();
 
+      music = this.sound.add('music');
+      music.loop = true;
+      music.play();
 
+      soundEffects = this.sound.add('boom');
+      //soundEffects.play();
+      //soundEffects.stop();
+      //soundEffects.pause();
+      //soundEffects.resume();
 
       for(i=0;i<numberOfBones;i++)
       {
@@ -203,10 +215,7 @@ function init()
         sparxs.push(newSparx);
       }
 
-
       //segmentEnemy = new enemyChain(this,config.width/2,config.height/2,enemyLength,enemySpeed);
-
-
 
        whiteColor = new Phaser.Display.Color(100, 0, 0);
         whiteColor = new Phaser.Display.Color(100, 0, 0);
@@ -399,6 +408,7 @@ while(!found)
 
 function update ()
 {
+
   //console.log(player.x);
   //console.log(player.y);
     if (justStarted == true && Phaser.Input.Keyboard.JustDown(enterButton)) {
@@ -1323,6 +1333,9 @@ function checkUncover()
         {
           console.log("boooooooooooooom");
           element.explode();
+          //music.stop();
+          //soundEffects.play();
+        //  soundEffects.stop();
         }
         else
         {
