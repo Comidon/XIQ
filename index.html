@@ -238,7 +238,7 @@ function init()
         enterButton = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
         keys = this.input.keyboard
 
-        player = this.add.sprite(xBorderShift, yBorderShift, 'player');
+        player = this.add.sprite(xBorderShift, yBorderShift, 'player').setOrigin(.48,.8);
         let playerScale = 1.3;
         player.setDisplaySize(player.width*playerScale, player.height*playerScale);
         player.setDepth(playerLayer);
@@ -2038,6 +2038,7 @@ class bomb extends Phaser.Physics.Arcade.Sprite {
 
   explode()
   {
+
     this.coverSprite.setDepth(0);
     this.damaged = true;
     this.visible = false;
@@ -2052,6 +2053,8 @@ blendMode: 'ADD'
 this.spEmitter.startFollow(this);
     this.addBoundsToBorder();
     killPlayer();
+    soundBoom.volume = .4;
+        soundBoom.play();
   }
 
 }
