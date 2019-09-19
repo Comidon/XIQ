@@ -101,6 +101,7 @@
 
    var sparxs=[];
    var numberOfSparx=3;
+   var sparxChance=30;
 
 
     var scoreText;
@@ -142,6 +143,8 @@
     var lose = false;
     var soundEffects;
     var music;
+  
+    
 
     //var segmentEnemy;
 
@@ -219,9 +222,7 @@ function init()
 
       for(i=0;i<numberOfSparx;i++)
       {
-        let point =getRandomPointOnBorder();
-        let newSparx = new sparx(this,point[0],point[1]);
-        sparxs.push(newSparx);
+        spawnRandomSparx(100);
       }
 
       //segmentEnemy = new enemyChain(this,config.width/2,config.height/2,enemyLength,enemySpeed);
@@ -478,6 +479,8 @@ function update ()
       return;
     }
 
+
+
     if (count == 3) {
       loseScreen.visible = true;
       lose = true;
@@ -496,9 +499,20 @@ function update ()
     }
     updatePlayerParticles();
 
-    handleMove();
+    handleMove();    
     //enemy.update();
     //updateEnemy();
+}
+
+function spawnRandomSparx(chance)
+{
+  if(randomIntFromInterval(1,100)<=chance)
+  {
+    let point =getRandomPointOnBorder();
+    let newSparx = new sparx(_this,point[0],point[1]);
+    sparxs.push(newSparx);
+  }
+ 
 }
 
 function updatePlayerParticles()
@@ -953,6 +967,7 @@ function removeAllTemporaryBorders()
 
 function processCapture(bomb=false)//player has completed a square, process it
 {
+
 if(!bomb)
 {
     graphics.clear();
@@ -972,6 +987,7 @@ if(!bomb)
     recalcBorders();
 
 }
+spawnRandomSparx(sparxChance);
 
 }
 function recalcBorders()
