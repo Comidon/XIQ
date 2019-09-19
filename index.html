@@ -121,6 +121,8 @@
     var shovel;
     var boneDeco1;
     var boneDeco2;
+    var scoreText2;
+    var percentText2;
 
     var shadowWidth=10;
     var count = 0;
@@ -241,16 +243,16 @@ function init()
         fuse = this.add.sprite(-100, -100, 'sparx');
         fuse.alpha=0;
 
-        heart1 = this.add.sprite(425, 25, 'heart');
-        heart2 = this.add.sprite(450, 25, 'heart');
-        heart3 = this.add.sprite(475, 25, 'heart');
+        heart1 = this.add.sprite(945, 35, 'heart');
+        heart2 = this.add.sprite(970, 35, 'heart');
+        heart3 = this.add.sprite(995, 35, 'heart');
         heart1.setDepth(UILayer);
         heart2.setDepth(UILayer);
         heart3.setDepth(UILayer);
 
 
-        scoreText = this.add.text(10, 5, 'Score: 0', { font: '40px monospace', fill: '#ffffff' });
-        percentText = this.add.text(10, 55, 'Percentage: 0%', { font: '40px monospace', fill: '#ffffff' });
+        scoreText = this.add.text(60, 25, 'Score: 0', { font: '50px monospace', fill: '#F9BFF7' });
+        percentText = this.add.text(1460, 25, 'Percentage: 0%', { font: '50px monospace', fill: '#F9BFF7' });
 
         scoreText.setDepth(UILayer);
         percentText.setDepth(UILayer);
@@ -287,6 +289,12 @@ function init()
         boneDeco1.setScale(2.4);
         boneDeco1.flipX = true;
 
+        scoreText2 = this.add.text(60, 25, 'Score: 0', { font: '50px monospace', fill: '#F9BFF7' });
+        percentText2 = this.add.text(1460, 25, 'Percentage: 0%', { font: '50px monospace', fill: '#F9BFF7' });
+        scoreText2.visible = false;
+        percentText2.visible = false;
+        scoreText2.setDepth(UILayer);
+        percentText2.setDepth(UILayer);
 
         //  The score
         //scoreText.sendToFront();
@@ -442,6 +450,8 @@ function update ()
     if (win)
     {
       bg.visible = true;
+      scoreText2.visible = true;
+      percentText2.visible = true;
       if (Phaser.Input.Keyboard.JustDown(enterButton))
       {
         location.reload();
@@ -470,6 +480,8 @@ function update ()
       loseScreen.visible = true;
       lose = true;
       bg.visible = true;
+      scoreText2.visible = true;
+      percentText2.visible = true;
       //location.reload();
       count = 0;
     }
@@ -1500,7 +1512,8 @@ if(countsForPoints)
 
   scoreText.setText('Score: ' + score);
   percentText.setText('Percentage: ' + Math.round(100 - remainingPixels / (gameWidth * gameHeight) * 100) + '%');
-
+  scoreText2.setText('Score: ' + score);
+  percentText2.setText('Percentage: ' + Math.round(100 - remainingPixels / (gameWidth * gameHeight) * 100) + '%');
  // console.log(percentage);
 
   //console.log(percentage / (config.width * config.height));
