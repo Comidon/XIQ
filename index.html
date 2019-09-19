@@ -140,7 +140,7 @@
 
     var win = false;
     var lose = false;
-    var soundEffects;
+    var soundBoom;
     var music;
 
     //var segmentEnemy;
@@ -185,7 +185,8 @@ function init()
         this.load.image('win','assets/win.png');
         this.load.image('lose','assets/lose.png');
         this.load.audio('music', 'assets/music.mp3');
-        this.load.audio('boom', 'assets/boom.mp3');
+        this.load.audio('boom', 'assets/boom2.mp3');
+
     }
 
     function create ()
@@ -195,10 +196,11 @@ function init()
       initBoard();
 
       music = this.sound.add('music');
+      music.volume = .7;
       music.loop = true;
       music.play();
 
-      soundEffects = this.sound.add('boom');
+      soundBoom = this.sound.add('boom');
       //soundEffects.play();
       //soundEffects.stop();
       //soundEffects.pause();
@@ -252,7 +254,6 @@ function init()
         heart2.setDepth(UILayer);
         heart3.setDepth(UILayer);
 
-
         scoreText = this.add.text(60, 25, 'Score: 0', { font: '50px monospace', fill: '#F9BFF7' });
         percentText = this.add.text(1460, 25, 'Percentage: 0%', { font: '50px monospace', fill: '#F9BFF7' });
 
@@ -260,7 +261,6 @@ function init()
         percentText.setDepth(UILayer);
         //this.add.rectangle(0, 0, 100, 100, whiteColor.color);
         enemyWidth = enemy.width;
-
 
         lineGraphics = this.add.graphics({ fillStyle: { color: 0x0000aa } });
         lineGraphics.setDepth(playerLayer);
@@ -282,7 +282,7 @@ function init()
         loseScreen.setDepth(UILayer);
         winScreen.visible = false;
         loseScreen.visible = false;
-        shovel = this.add.sprite(550, 630, 'player').setOrigin(0,0);
+        shovel = this.add.sprite(570, 630, 'player').setOrigin(0,0);
         shovel.setDepth(UILayer);
         shovel.setScale(2.2);
         shovel.flipX = true;
@@ -1967,7 +1967,9 @@ class bomb extends Phaser.Physics.Arcade.Sprite {
       scale: { start: .3, end: .2 },
     blendMode: 'ADD'
       });
-    this.spEmitter.startFollow(this);
+        this.spEmitter.startFollow(this);
+        soundBoom.volume = .5;
+        soundBoom.play();
         this.addBoundsToBorder();
         killPlayer();
       }
@@ -2003,7 +2005,7 @@ class bomb extends Phaser.Physics.Arcade.Sprite {
 
   explode()
   {
-    this.coverSprite.setDepth(0);    
+    this.coverSprite.setDepth(0);
     this.damaged = true;
     this.visible = false;
     this.spEmitter.visible=false;
