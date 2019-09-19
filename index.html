@@ -99,6 +99,10 @@
     var drawSound1;
     var drawSound2;
     var hurtSound;
+    var captureSound;
+    var boneSound;
+    var boneBreakSound;
+    var bombDefuseSound;
 
     var bones=[];
     var numberOfBones=7;
@@ -205,6 +209,10 @@ function init()
         this.load.audio('drawSound1', 'assets/drawSound1.mp3');
         this.load.audio('drawSound2', 'assets/drawSound2.mp3');
         this.load.audio('hurtSound', 'assets/hurt.mp3');
+        this.load.audio('capture', 'assets/capture.wav');
+        this.load.audio('boneScore', 'assets/bone.wav');
+        this.load.audio('boneBreak', 'assets/boneBreak.wav');
+        this.load.audio('bombDefuse', 'assets/bombDefuse.wav');
     }
 
     function create ()
@@ -225,6 +233,10 @@ function init()
       drawSound1 = this.sound.add('drawSound1');
       drawSound2 = this.sound.add('drawSound2');
       hurtSound = this.sound.add('hurtSound');
+      captureSound = this.sound.add('capture');
+      boneSound = this.sound.add('boneScore');
+      boneBreakSound = this.sound.add('boneBreak');
+      bombDefuseSound = this.sound.add('bombDefuse');
 
     let border=10;
       for(i=0;i<numberOfBones;i++)
@@ -1016,6 +1028,8 @@ function processCapture(bomb=false)//player has completed a square, process it
 
 if(!bomb)
 {
+    captureSound.volume=.5;
+   
     graphics.clear();
     shadowGraphics.clear();
     console.log("Done Drawing!");
@@ -1023,9 +1037,10 @@ if(!bomb)
     let startPoint = checkWhichPointToFill();
     floodFill(startPoint[0], startPoint[1]);
     recalcBorders();
+    captureSound.play();
    //printBorders();
 }else
-{
+{  
     graphics.clear();
     shadowGraphics.clear();
     addAllTemporaryBorders();
@@ -1409,6 +1424,8 @@ function checkUncover()
 
       if ((border[get1DIndex(recTop, recLeft)] != -1) && (border[get1DIndex(recTop, recRight)] != -1) && (border[get1DIndex(recBottom, recLeft)] != -1) && (border[get1DIndex(recBottom, recRight)] != -1))
       {
+        boneSound.volume=.5;
+        boneSound.play();
         score += bonusScore;
         element.detected = true;
         element.coverSprite.visible=false;
@@ -1446,6 +1463,8 @@ function checkUncover()
           console.log("mooooooooooooooob");
           element.detected = true;
           element.spEmitter.visible=false;
+          bombDefuseSound.volume=.5;
+          bombDefuseSound.play();
         }
         //element.visible = false;
       }
@@ -1861,6 +1880,8 @@ class fossil extends Phaser.Physics.Arcade.Sprite {
         scoreText.setText("Score: " + score);
         this.spEmitter.visible=false;
         this.coverSprite.setDepth(0);
+        boneBreakSound.volume=.5;
+        boneBreakSound.play();
       }
     }
   }
