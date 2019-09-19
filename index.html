@@ -96,8 +96,8 @@
 
     var bones=[];
     var bombs=[];
-    var numberOfBones=5;
-    var numberOfBombs=3;
+    var numberOfBones=7;
+    var numberOfBombs=5;
 
    var sparxs=[];
    var numberOfSparx=3;
@@ -181,6 +181,7 @@ function init()
         this.load.image('bg', 'assets/blackBackground.png');
         this.load.image('title', 'assets/Title.png'); //temp title
         this.load.image('bomb','assets/bomb2.png');
+        this.load.image('bombBuried','assets/tnt_buried.png');
         this.load.image('win','assets/win.png');
         this.load.image('lose','assets/lose.png');
         this.load.audio('music', 'assets/music.mp3');
@@ -203,15 +204,16 @@ function init()
       //soundEffects.pause();
       //soundEffects.resume();
 
+    let border=10;
       for(i=0;i<numberOfBones;i++)
       {
-        let fossil1 = new fossil(this,randomIntFromInterval(xMin,xMax),randomIntFromInterval(yMin,yMax));
+        let fossil1 = new fossil(this,randomIntFromInterval(xMin+border,xMax-border),randomIntFromInterval(yMin+border,yMax-border));
         bones.push(fossil1);
       }
 
       for(i=0;i<numberOfBombs;i++)
       {
-        let bomb1 = new bomb(this,randomIntFromInterval(xMin,xMax),randomIntFromInterval(yMin,yMax));
+        let bomb1 = new bomb(this,randomIntFromInterval(xMin+border,xMax-border),randomIntFromInterval(yMin+border,yMax-border));
         bombs.push(bomb1);
       }
 
@@ -1364,6 +1366,7 @@ function checkUncover()
 
       if ((border[get1DIndex(recTop, recLeft)] != -1) && (border[get1DIndex(recTop, recRight)] != -1) && (border[get1DIndex(recBottom, recLeft)] != -1) && (border[get1DIndex(recBottom, recRight)] != -1))
       {
+        element.coverSprite.setDepth(0);
         if (drawMode == 2)
         {
           console.log("boooooooooooooom");
@@ -1376,6 +1379,7 @@ function checkUncover()
         {
           console.log("mooooooooooooooob");
           element.detected = true;
+          element.spEmitter.visible=false;
         }
         //element.visible = false;
       }
@@ -1924,7 +1928,7 @@ class bomb extends Phaser.Physics.Arcade.Sprite {
 
   constructor(scene, x = 0, y = 0, texture = 'bomb') {
     super(scene, x, y, texture)
-    this.setDepth(bombLayer);
+    this.setDepth(fossilLayer);
     scene.add.existing(this)  ;
     this.detected = false;
     this.damaged = false;
@@ -1933,7 +1937,8 @@ class bomb extends Phaser.Physics.Arcade.Sprite {
     this.deathTimer=0;
     this.explodeTime=100;
     this.hidden=false;
-
+    this.coverSprite =_this.add.sprite(x, y, 'bombBuried');
+    this.coverSprite.setDepth(bombLayer);
     scene.events.on('update', this.update, this);
     this.spPart = scene.add.particles('red');
 
@@ -1998,6 +2003,7 @@ class bomb extends Phaser.Physics.Arcade.Sprite {
 
   explode()
   {
+    this.coverSprite.setDepth(0);    
     this.damaged = true;
     this.visible = false;
     this.spEmitter.visible=false;
