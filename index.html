@@ -157,9 +157,10 @@
     var soundBoom;
     var music;
 
-    var controlSplashLength=700;
+    var controlSplashLength=150;
     var controlSplashTimer=0;
     var controlSplash;
+    var skippedControlSplash=false;
     
 
 
@@ -494,22 +495,29 @@ function update ()
         boneDeco1.visible = false;
         console.log("Entered");
         gameHasStarted=true;
+        controlSplash.visible=true;
     }
-
-    controlSplash.visible=true;
-  if(controlSplashTimer<controlSplashLength && gameHasStarted)
-  {
     
-    controlSplashTimer++;
-    let percent = 1-controlSplashTimer/controlSplashLength;  
-    if(percent<.4)
-    {
-      controlSplash.alpha=percent*2.5;
-    }
-     if(Phaser.Input.Keyboard.JustDown(enterButton))
+if(controlSplashTimer<controlSplashLength&&skippedControlSplash && gameHasStarted)
+{
+  controlSplashTimer++;
+  let percent = 1-controlSplashTimer/controlSplashLength;   
+  controlSplash.alpha=percent;
+}else if(!skippedControlSplash)
+{
+  if(Phaser.Input.Keyboard.JustDown(enterButton))
      {
-      controlSplashTimer=controlSplashLength;
+      skippedControlSplash=true;
      }
+  return;
+}
+
+
+
+   
+  if(controlSplashTimer<controlSplashLength && gameHasStarted)
+  {    
+   
     return;
   }else
   {
