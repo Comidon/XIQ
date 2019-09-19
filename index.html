@@ -94,9 +94,11 @@
     var scoreFactor=0;
     var percentage = 0;
 
-    var bones=[];
-    var bombs=[];
+    var bones=[];   
     var numberOfBones=7;
+    var bonesFound=0;
+
+    var bombs=[];
     var numberOfBombs=5;
 
    var sparxs=[];
@@ -106,6 +108,7 @@
 
     var scoreText;
     var percentText;
+    var boneText;
     var winText;
 
     var backTex;
@@ -169,7 +172,7 @@ function init()
         this.load.image('yellow', 'assets/yellow.png');
         this.load.image('blue', 'assets/blue.png');
         this.load.image('enemyHead','assets/enemyHead.png');
-        this.load.image('enemyTail','assets/enemyTail.png');
+        this.load.image('enemyTail','assets/enemyBody.png');
         this.load.image('enemyBody','assets/enemyBody.png');
         this.load.image('sparx','assets/sparx.png')
         this.load.image('heart', 'assets/heart.jpg');
@@ -181,7 +184,7 @@ function init()
         this.load.image('bone1Buried','assets/bone1_buried.png');
         this.load.image('bone2Buried','assets/bone2_buried.png');
         this.load.image('bone3Buried','assets/bone3_buried.png');
-        this.load.image('bg', 'assets/blackBackground.png');
+        this.load.image('bg', 'assets/background.png');
         this.load.image('title', 'assets/Title.png'); //temp title
         this.load.image('bomb','assets/bomb2.png');
         this.load.image('bombBuried','assets/tnt_buried.png');
@@ -256,10 +259,12 @@ function init()
         heart3.setDepth(UILayer);
 
         scoreText = this.add.text(60, 25, 'Score: 0', { font: '50px monospace', fill: '#F9BFF7' });
-        percentText = this.add.text(1460, 25, 'Percentage: 0%', { font: '50px monospace', fill: '#F9BFF7' });
+        percentText = this.add.text(1420, 25, 'Percentage: 0%', { font: '50px monospace', fill: '#F9BFF7' });
+        boneText = this.add.text(1420, 95, 'Fossils: 0/'+numberOfBones, { font: '50px monospace', fill: '#F9BFF7' });
 
         scoreText.setDepth(UILayer);
         percentText.setDepth(UILayer);
+        boneText.setDepth(UILayer);
         //this.add.rectangle(0, 0, 100, 100, whiteColor.color);
         enemyWidth = enemy.width;
 
@@ -269,9 +274,9 @@ function init()
         shadowGraphics = this.add.graphics({ fillStyle: { color: 0x000000, alpha: 0.3 } });
         shadowGraphics.setDepth(shadowLayer);
 
-        bg = this.add.sprite(gameWidth, gameHeight, 'bg')
+        bg = this.add.sprite(0, 0, 'bg').setOrigin(0,0);
         bg.setDepth(UILayer);
-        bg.setScale(2.0);
+        //bg.setScale(2.0);
         title = this.add.sprite(300, 100, 'title').setOrigin(0,0);
         title.setScale(.7);
         title.setDepth(UILayer);
@@ -296,8 +301,8 @@ function init()
         percentText2 = this.add.text(1460, 25, 'Percentage: 0%', { font: '50px monospace', fill: '#F9BFF7' });
         scoreText2.visible = false;
         percentText2.visible = false;
-        scoreText2.setDepth(UILayer);
-        percentText2.setDepth(UILayer);
+        scoreText2.setDepth(0);
+        percentText2.setDepth(0);
 
         //  The score
         //scoreText.sendToFront();
@@ -453,8 +458,12 @@ function update ()
     if (win)
     {
       bg.visible = true;
-      scoreText2.visible = true;
-      percentText2.visible = true;
+     // scoreText2.visible = true;
+     // percentText2.visible = true;
+      
+        scoreText.setDepth(UILayer+1);
+        percentText.setDepth(UILayer+1);
+        boneText.setDepth(UILayer+1);
       if (Phaser.Input.Keyboard.JustDown(enterButton))
       {
         location.reload();
@@ -464,6 +473,9 @@ function update ()
 
     if (lose)
     {
+      scoreText.setDepth(UILayer+1);
+        percentText.setDepth(UILayer+1);
+        boneText.setDepth(UILayer+1);
       console.log("You lose");
       if (Phaser.Input.Keyboard.JustDown(enterButton))
       {
@@ -1365,7 +1377,9 @@ function checkUncover()
         element.detected = true;
         element.coverSprite.visible=false;
         element.spEmitter.visible=true;
-
+        bonesFound++;
+        boneText.setText('Fossils: ' + bonesFound +"/"+numberOfBones);
+        
       }
     }
   });
@@ -1531,7 +1545,7 @@ if(countsForPoints)
 }
 
   scoreText.setText('Score: ' + score);
-  percentText.setText('Percentage: ' + Math.round(100 - remainingPixels / (gameWidth * gameHeight) * 100) + '%');
+  percentText.setText('Percentage: ' + Math.round(100 - remainingPixels / (gameWidth * gameHeight) * 100) + '/75%');
   scoreText2.setText('Score: ' + score);
   percentText2.setText('Percentage: ' + Math.round(100 - remainingPixels / (gameWidth * gameHeight) * 100) + '%');
  // console.log(percentage);
@@ -1546,7 +1560,7 @@ if(countsForPoints)
     if (checkAllBonesCollected())
     {
       winScreen.visible = true;
-      win = true;
+      win = true;     
       //_this.add.text(175, 230, 'You Win!', { font: '40px monospace', fill: '#ffffff' });
     }
   }
@@ -2195,8 +2209,6 @@ class enemyChain
     this.y = this.chain[0].y;
   }
 }
-
-
 
 
 
