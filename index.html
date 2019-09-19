@@ -177,6 +177,7 @@ function init()
         this.load.image('green', 'assets/green.png');
         this.load.image('yellow', 'assets/yellow.png');
         this.load.image('blue', 'assets/blue.png');
+        this.load.image('brown', 'assets/brown.png');
         this.load.image('enemyHead','assets/enemyHead2.png');
         this.load.image('enemyTail','assets/enemyBody2.png');
         this.load.image('enemyBody','assets/enemyBody2.png');
@@ -2198,6 +2199,16 @@ class enemyChain
     this.y = y;
     let i=1;
     this.chain.push(new enemySegment(scene, x, y,"enemyHead"));
+    this.spPart = scene.add.particles('brown');
+
+    this.spEmitter = this.spPart.createEmitter({
+      speed: 20,
+      frequency :100,
+      scale: { start: .5, end: 0 },
+    blendMode: 'ADD'
+});
+  this.spPart.setDepth(particleLayer);
+  this.spEmitter.startFollow(this);
 
     for (i = 1; i < size-1; i++) {
       this.chain.push(new enemySegment(scene, this.chain[i - 1].followX, this.chain[i - 1].followY,"enemyBody"));
