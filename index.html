@@ -55,6 +55,7 @@
     var blueEmitter;
     var goingLeft=0; //0 Right, 1 Left, 2 up 3 down.
 
+    var bg;
     var enemy;
     var enemyWidth;
     var enemySpeed=5;
@@ -117,6 +118,9 @@
     var shadowLayer=3;
     var frontLayer=4;
     var bombLayer = 5
+    var shovel;
+    var boneDeco1;
+    var boneDeco2;
 
     var shadowWidth=10;
     var count = 0;
@@ -172,6 +176,7 @@ function init()
         this.load.image('bone1Buried','assets/bone1_buried.png');
         this.load.image('bone2Buried','assets/bone2_buried.png');
         this.load.image('bone3Buried','assets/bone3_buried.png');
+        this.load.image('bg', 'assets/blackBackground.png');
         this.load.image('title', 'assets/Title.png'); //temp title
         this.load.image('bomb','assets/bomb2.png');
         this.load.image('win','assets/win.png');
@@ -217,7 +222,6 @@ function init()
 
       //segmentEnemy = new enemyChain(this,config.width/2,config.height/2,enemyLength,enemySpeed);
 
-       whiteColor = new Phaser.Display.Color(100, 0, 0);
         whiteColor = new Phaser.Display.Color(100, 0, 0);
         cursors = this.input.keyboard.createCursorKeys();
         spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
@@ -259,21 +263,36 @@ function init()
 
         shadowGraphics = this.add.graphics({ fillStyle: { color: 0x000000, alpha: 0.3 } });
         shadowGraphics.setDepth(shadowLayer);
-        title = this.add.sprite(0, 0, 'title').setOrigin(0,0);
+
+        bg = this.add.sprite(gameWidth, gameHeight, 'bg')
+        bg.setDepth(UILayer);
+        bg.setScale(2.0);
+        title = this.add.sprite(300, 100, 'title').setOrigin(0,0);
+        title.setScale(.7);
         title.setDepth(UILayer);
-        winScreen = this.add.sprite(0, 0, 'win').setOrigin(0,0);
+        winScreen = this.add.sprite(300, 100, 'win').setOrigin(0,0);
+        winScreen.setScale(.7);
         winScreen.setDepth(UILayer);
-        loseScreen = this.add.sprite(0, 0, 'lose').setOrigin(0,0);
+        loseScreen = this.add.sprite(300, 100, 'lose').setOrigin(0,0);
+        loseScreen.setScale(.7);
         loseScreen.setDepth(UILayer);
         winScreen.visible = false;
         loseScreen.visible = false;
+        shovel = this.add.sprite(550, 630, 'player').setOrigin(0,0);
+        shovel.setDepth(UILayer);
+        shovel.setScale(2.2);
+        shovel.flipX = true;
+        boneDeco1 = this.add.sprite(1240, 650, 'bone2').setOrigin(0,0);
+        boneDeco1.setDepth(UILayer);
+        boneDeco1.setScale(2.4);
+        boneDeco1.flipX = true;
+
 
         //  The score
         //scoreText.sendToFront();
 
         let scale=1.56;
         backTex = this.add.sprite(0, 0, 'back').setOrigin(0,0);
-
 
         backTex.setDisplaySize(config.width,config.height);
         backTex.setDepth(backLayer);
@@ -408,18 +427,21 @@ while(!found)
 
 function update ()
 {
-
   //console.log(player.x);
   //console.log(player.y);
     if (justStarted == true && Phaser.Input.Keyboard.JustDown(enterButton)) {
         justStarted = false;
         title.visible = false;
+        bg.visible = false;
+        shovel.visible = false;
+        boneDeco1.visible = false;
         console.log("Entered");
         gameHasStarted=true;
     }
 
     if (win)
     {
+      bg.visible = true;
       if (Phaser.Input.Keyboard.JustDown(enterButton))
       {
         location.reload();
@@ -447,6 +469,7 @@ function update ()
     if (count == 3) {
       loseScreen.visible = true;
       lose = true;
+      bg.visible = true;
       //location.reload();
       count = 0;
     }
