@@ -171,9 +171,9 @@ function init()
         this.load.image('green', 'assets/green.png');
         this.load.image('yellow', 'assets/yellow.png');
         this.load.image('blue', 'assets/blue.png');
-        this.load.image('enemyHead','assets/enemyHead.png');
-        this.load.image('enemyTail','assets/enemyBody.png');
-        this.load.image('enemyBody','assets/enemyBody.png');
+        this.load.image('enemyHead','assets/enemyHead2.png');
+        this.load.image('enemyTail','assets/enemyBody2.png');
+        this.load.image('enemyBody','assets/enemyBody2.png');
         this.load.image('sparx','assets/sparx.png')
         this.load.image('heart', 'assets/heart.jpg');
         this.load.image('back','assets/back.png');
@@ -239,6 +239,8 @@ function init()
         keys = this.input.keyboard
 
         player = this.add.sprite(xBorderShift, yBorderShift, 'player');
+        let playerScale = 1.3;
+        player.setDisplaySize(player.width*playerScale, player.height*playerScale);
         player.setDepth(playerLayer);
         resetPlayerPosition();
 
@@ -2059,8 +2061,8 @@ class enemySegment extends Phaser.Physics.Arcade.Sprite
   constructor(scene, x = 0, y = 0, texture = '') {
     super(scene, x, y, texture);
     this.setDepth(playerLayer);
-    this.setDisplaySize(70,70);
-    this.spacing =45;
+    this.setDisplaySize(100,100);
+    this.spacing =35;
 
     scene.add.existing(this);
     scene.events.on('update', this.update, this);
