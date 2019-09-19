@@ -1998,7 +1998,8 @@ class bomb extends Phaser.Physics.Arcade.Sprite {
     blendMode: 'ADD'
       });
         this.spEmitter.startFollow(this);
-        soundBoom.volume = .5;
+        this.coverSprite.setDepth(0);
+        soundBoom.volume = .4;
         soundBoom.play();
         this.addBoundsToBorder();
         killPlayer();
@@ -2039,6 +2040,7 @@ class bomb extends Phaser.Physics.Arcade.Sprite {
     this.damaged = true;
     this.visible = false;
     this.spEmitter.visible=false;
+    this.coverSprite.setDepth(0);
     this.spEmitter = this.spPart.createEmitter({
   speed: 100,
   frequency :0,
