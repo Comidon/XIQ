@@ -157,6 +157,11 @@
     var soundBoom;
     var music;
 
+    var controlSplashLength=300;
+    var controlSplashTimer=0;
+    var controlSplash;
+    
+
 
 
     //var segmentEnemy;
@@ -187,7 +192,7 @@ function init()
         this.load.image('enemyBody','assets/enemyBody2.png');
         this.load.image('sparx','assets/sparx.png')
         this.load.image('heart', 'assets/heart.jpg');
-        this.load.image('back','assets/back.png');
+        this.load.image('back','assets/background.png');
         this.load.image('front','assets/front.png');
         this.load.image('bone1','assets/bone1.png');
         this.load.image('bone2','assets/bone2.png');
@@ -201,6 +206,7 @@ function init()
         this.load.image('bombBuried','assets/tnt_buried.png');
         this.load.image('win','assets/win.png');
         this.load.image('lose','assets/lose.png');
+        this.load.image('controlSplash', 'assets/controlSplash.png');
         this.load.audio('music', 'assets/music.mp3');
         this.load.audio('boom', 'assets/boom2.mp3');
         this.load.audio('goodSound', 'assets/goodSound.mp3');
@@ -213,6 +219,7 @@ function init()
         this.load.audio('boneScore', 'assets/bone.wav');
         this.load.audio('boneBreak', 'assets/boneBreak.wav');
         this.load.audio('bombDefuse', 'assets/bombDefuse.wav');
+        
     }
 
     function create ()
@@ -304,6 +311,12 @@ function init()
 
         bg = this.add.sprite(0, 0, 'bg').setOrigin(0,0);
         bg.setDepth(UILayer);
+
+        controlSplash = this.add.sprite(0, 0, 'controlSplash').setOrigin(0,0);
+        controlSplash.setDepth(UILayer);
+        controlSplash.setScale(1.5);
+        controlSplash.visible=false;
+
         //bg.setScale(2.0);
         title = this.add.sprite(300, 100, 'title').setOrigin(0,0);
         title.setScale(.7);
@@ -482,6 +495,26 @@ function update ()
         console.log("Entered");
         gameHasStarted=true;
     }
+
+    controlSplash.visible=true;
+  if(controlSplashTimer<controlSplashLength && gameHasStarted)
+  {
+    
+    controlSplashTimer++;
+    let percent = 1-controlSplashTimer/controlSplashLength;  
+    if(percent<.5)
+    {
+      controlSplash.alpha=percent*2;
+    }
+     
+    
+    
+    return;
+  }else
+  {
+    controlSplash.visible=false;
+  }
+  
 
     if (win)
     {
@@ -2219,7 +2252,7 @@ class enemyChain
     this.x = x;
     this.y = y;
     let i=1;
-    this.chain.push(new enemySegment(scene, x, y,"enemyHead"));
+    this.chain.push(new enemySegment(scene, x, y,"enemyHead").setDepth(playerLayer+.5));
     this.spPart = scene.add.particles('brown');
 
     this.spEmitter = this.spPart.createEmitter({
@@ -2232,9 +2265,9 @@ class enemyChain
   this.spEmitter.startFollow(this);
 
     for (i = 1; i < size-1; i++) {
-      this.chain.push(new enemySegment(scene, this.chain[i - 1].followX, this.chain[i - 1].followY,"enemyBody"));
+      this.chain.push(new enemySegment(scene, this.chain[i - 1].followX, this.chain[i - 1].followY,"enemyBody").setDepth(playerLayer-(i/100)));
     }
-    this.chain.push(new enemySegment(scene, this.chain[size-2 - 1].followX, this.chain[size-2 - 1].followY,"enemyTail"));
+    this.chain.push(new enemySegment(scene, this.chain[size-2 - 1].followX, this.chain[size-2 - 1].followY,"enemyTail").setDepth(playerLayer-99.99));
 
     scene.events.on('update', this.update, this);
 
