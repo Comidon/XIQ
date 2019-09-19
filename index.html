@@ -93,6 +93,12 @@
     var movingDir;
     var scoreFactor=0;
     var percentage = 0;
+    var goodSound;
+    var okaySound;
+    var badSound;
+    var drawSound1;
+    var drawSound2;
+    var hurtSound;
 
     var bones=[];
     var bombs=[];
@@ -143,8 +149,8 @@
     var lose = false;
     var soundBoom;
     var music;
-  
-    
+
+
 
     //var segmentEnemy;
 
@@ -168,9 +174,9 @@ function init()
         this.load.image('green', 'assets/green.png');
         this.load.image('yellow', 'assets/yellow.png');
         this.load.image('blue', 'assets/blue.png');
-        this.load.image('enemyHead','assets/enemyHead.png');
-        this.load.image('enemyTail','assets/enemyTail.png');
-        this.load.image('enemyBody','assets/enemyBody.png');
+        this.load.image('enemyHead','assets/WORM.png');
+        this.load.image('enemyTail','assets/wormbody.png');
+        this.load.image('enemyBody','assets/wormbody.png');
         this.load.image('sparx','assets/sparx.png')
         this.load.image('heart', 'assets/heart.jpg');
         this.load.image('back','assets/back.png');
@@ -189,7 +195,12 @@ function init()
         this.load.image('lose','assets/lose.png');
         this.load.audio('music', 'assets/music.mp3');
         this.load.audio('boom', 'assets/boom2.mp3');
-
+        this.load.audio('goodSound', 'assets/goodSound.mp3');
+        this.load.audio('okaySound', 'assets/okaySound.mp3');
+        this.load.audio('badSound', 'assets/badSound.mp3');
+        this.load.audio('drawSound1', 'assets/drawSound.mp3');
+        this.load.audio('drawSound2', 'assets/drawSound2.mp3');
+        this.load.audio('hurtSound', 'assets/hurt.mp3');
     }
 
     function create ()
@@ -204,6 +215,12 @@ function init()
       music.play();
 
       soundBoom = this.sound.add('boom');
+      goodSound = this.sound.add('goodSound');
+      okaySound = this.sound.add('okaySound');
+      badSound = this.sound.add('badSound');
+      drawSound1 = this.sound.add('drawSound1');
+      drawSound2 = this.sound.add('drawSound2');
+      hurtSound = this.sound.add('hurtSound');
       //soundEffects.play();
       //soundEffects.stop();
       //soundEffects.pause();
@@ -479,9 +496,9 @@ function update ()
       return;
     }
 
-
-
     if (count == 3) {
+      badSound.volume = .8;
+      badSound.play();
       loseScreen.visible = true;
       lose = true;
       bg.visible = true;
@@ -496,12 +513,26 @@ function update ()
         drawMode++;
         drawMode %= 3;
         console.log(drawMode);
+        if (drawMode == 1) {
+          drawSound1.volume = .9;
+          drawSound1.play();
+        }
+        if (drawMode == 1) {
+          drawSound1.pause();
+          drawSound2.volume = .9;
+          drawSound2.play();
+        }
     }
     updatePlayerParticles();
 
-    handleMove();    
+    handleMove();
     //enemy.update();
     //updateEnemy();
+
+    if (drawMode < 1) {
+      drawSound1.pause();
+      drawSound2.pause();
+    }
 }
 
 function spawnRandomSparx(chance)
@@ -512,7 +543,7 @@ function spawnRandomSparx(chance)
     let newSparx = new sparx(_this,point[0],point[1]);
     sparxs.push(newSparx);
   }
- 
+
 }
 
 function updatePlayerParticles()
@@ -529,6 +560,7 @@ function updatePlayerParticles()
     redEmitter.visible=false;
     blueEmitter.visible=true;
   }
+
 }
 
 function updateEnemy()
@@ -1547,6 +1579,9 @@ if(countsForPoints)
     {
       winScreen.visible = true;
       win = true;
+      goodSound.volume = .8;
+      gooSound.loopCount(2);
+      goodSound.play();
       //_this.add.text(175, 230, 'You Win!', { font: '40px monospace', fill: '#ffffff' });
     }
   }
